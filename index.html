@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>TrioNote</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 引入 Quill 富文本编辑器样式 -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <!-- 引入 Sortable.js 库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f0f0f0;
+            --header-bg-color: #ffffff;
+            --header-text-color: #333333;
+            --panel-bg-color: #ffffff;
+            --text-color: #333333;
+            --button-bg-color: #e0e0e0;
+            --button-text-color: #333333;
+            --button-hover-bg-color: #cccccc;
+            --delete-button-bg-color: #ff4d4d;
+            --delete-button-hover-bg-color: #ff1a1a;
+            --input-border-color: #cccccc;
+            --input-focus-border-color: #333333;
+            --scrollbar-thumb-color: rgba(0,0,0,0.2);
+            --active-bg-color: rgba(0, 0, 0, 0.05);
+            --tooltip-bg-color: rgba(0, 0, 0, 0.75);
+            --tooltip-text-color: white;
+            --tooltip-padding: 6px 8px;
+            --tooltip-border-radius: 4px;
+            --tooltip-font-size: 12px;
+            --tooltip-transition: opacity 0.3s ease;
+            --toolline-color: rgba(224, 224, 224, 0.68);
+            --transition-duration: 0.3s;
+        }
+        [data-theme="dark"] {
+            --bg-color: #1e1e1e;
+            --header-bg-color: #2c2c2c;
+            --header-text-color: #ffffff;
+            --panel-bg-color: #2c2c2c;
+            --text-color: #e0e0e0;
+            --button-bg-color: #3a3a3a;
+            --button-text-color: #ffffff;
+            --button-hover-bg-color: #4e4e4e;
+            --delete-button-bg-color: #ff4d4d;
+            --delete-button-hover-bg-color: #ff1a1a;
+            --input-border-color: #555555;
+            --input-focus-border-color: #ffffff;
+            --scrollbar-thumb-color: rgba(255,255,255,0.2);
+            --active-bg-color: rgba(255, 255, 255, 0.05);
+            --tooltip-bg-color: rgba(255, 255, 255, 0.9);
+            --tooltip-text-color: #000000;
+            --toolline-color: rgba(255, 255, 255, 0.9);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease;
+            font-size: 16px;
+            /* 禁用编辑器外文本选中 */
+            user-select: none; 
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none; 
+        }
+        #import-zip, #import-txt {
+            display: none;
+            }
+        header {
+            background-color: var(--header-bg-color);
+            color: var(--header-text-color);
+            padding: 1em;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            animation: slideDown 0.5s ease forwards;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        #container {
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            transition: padding var(--transition-duration) ease;
+        }
+        /* 备忘录列表 */
+        #memo-list {
+            width: 30%;
+            background-color: var(--panel-bg-color);
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+            overflow: hidden;
+            transition: box-shadow var(--transition-duration) ease, transform var(--transition-duration) ease, background-color var(--transition-duration) ease;
+            position: relative;
+        }
+        #memo-list:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+        }
+        #memo-list button, #export-selected-button, #delete-selected {
+            border: none;
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color var(--transition-duration) ease, transform var(--transition-duration) ease;
+            width: 100%;
+            position: relative;
+        }
+        #memo-list button:hover, #export-selected-button:hover, #delete-selected:hover {
+            background-color: var(--button-hover-bg-color);
+            transform: scale(1.02);
+        }
+        #delete-selected {
+            background-color: var(--delete-button-bg-color);
+        }
+        #delete-selected:hover {
+            background-color: var(--delete-button-hover-bg-color);
+        }
+        /* 导入按钮样式 */
+        #import-zip, #import-txt {
+            display: none;
+        }
+        #import-zip-label, #import-txt-label {
+            display: inline-block;
+            padding: 10px 0px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+            transition: background-color var(--transition-duration) ease, transform var(--transition-duration) ease;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            margin-bottom: 10px;
+        }
+        #import-zip-label:hover, #import-txt-label:hover {
+            background-color: var(--button-hover-bg-color);
+            transform: scale(1.02);
+        }
+        #search-bar {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all var(--transition-duration) ease;
+        }
+        #search-bar input {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid var(--input-border-color);
+            border-radius: 5px;
+            transition: border var(--transition-duration) ease;
+            background-color: var(--panel-bg-color);
+            color: var(--text-color);
+        }
+        #search-bar input::placeholder {
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+        #search-bar input:focus {
+            border-color: var(--input-focus-border-color);
+            outline: none;
+        }
+        #select-all-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 10px;
+            transition: all var(--transition-duration) ease;
+            position: relative;
+        }
+        #select-all-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        #list {
+            list-style: none;
+            padding: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+            transition: all var(--transition-duration) ease;
+            cursor: grab;
+        }
+        #list li {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            border-radius: 5px;
+            transition: background-color var(--transition-duration) ease, transform var(--transition-duration) ease;
+            position: relative;
+        }
+        #list li:hover, #list li.active {
+            background-color: var(--active-bg-color);
+            transform: translateX(2px);
+        }
+        #list li input[type="checkbox"] {
+            margin-right: 10px;
+            transition: transform var(--transition-duration) ease;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        #list li .edit-time {
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--text-color);
+        }
+        /* 富文本编辑器容器 */
+        #memo-editor {
+            width: 68%;
+            background-color: var(--panel-bg-color);
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow var(--transition-duration) ease, transform var(--transition-duration) ease, background-color var(--transition-duration) ease, opacity var(--transition-duration) ease;
+            position: relative;
+            animation: fadeIn 0.5s ease forwards;
+
+            /* 允许在编辑器内选中文本 */
+            user-select: text;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+        }
+        #memo-editor:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+        }
+        /* 标题输入框样式 */
+        #title-input {
+            font-size: 18px;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid var(--input-border-color);
+            border-radius: 5px;
+            outline: none;
+            width: 100%;
+        }
+        #title-input:focus {
+            border-color: var(--input-focus-border-color);
+        }
+        /* Quill 编辑器样式调整 */
+        .ql-container {
+            height: 60vh;
+            border-radius: 5px;
+            background-color: var(--panel-bg-color);
+            color: var(--text-color);
+            transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease;
+            overflow: auto;
+        }
+        .ql-editor {
+            background-color: var(--panel-bg-color);
+            color: var(--text-color);
+            transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease;
+            min-height: 300px;
+            font-size: 18px;
+        }
+        .ql-toolbar {
+            border-radius: 5px 5px 0 0;
+            background-color: var(--toolline-color);
+            border-bottom: 1px solid var(--input-border-color);
+            transition: background-color var(--transition-duration) ease, border-color var(--transition-duration) ease;
+        }
+        /* 控制按钮 */
+        #controls {
+            margin-top: 10px;
+            text-align: right;
+            display: flex;
+            gap: 10px;
+            position: relative;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        #controls button {
+            padding: 10px 15px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color var(--transition-duration) ease, transform var(--transition-duration) ease;
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+            border: none;
+            position: relative;
+        }
+        #controls button:hover {
+            background-color: var(--button-hover-bg-color);
+            transform: scale(1.02);
+        }
+        /* 分割线按钮样式 */
+        .ql-divider {
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        /* 自定义工具提示 */
+        .tooltip {
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--tooltip-bg-color);
+            color: var(--tooltip-text-color);
+            padding: var(--tooltip-padding);
+            border-radius: var(--tooltip-border-radius);
+            font-size: var(--tooltip-font-size);
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%; /* At the bottom of the tooltip */
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--tooltip-bg-color) transparent transparent transparent;
+        }
+        /* 显示工具提示 */
+        button:hover .tooltip,
+        label:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+        /* 滑动动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Scrollbar Styling */
+        #memo-list::-webkit-scrollbar, #list::-webkit-scrollbar {
+            width: 8px;
+        }
+        #memo-list::-webkit-scrollbar-thumb, #list::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-thumb-color);
+            border-radius: 4px;
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            #container {
+                flex-direction: column;
+                padding: 10px;
+                gap: 10px;
+            }
+            #memo-list, #memo-editor {
+                width: 100%;
+                height: auto;
+            }
+            .ql-container {
+                height: 40vh;
+            }
+            #list li {
+                padding: 8px;
+            }
+            #list li input[type="checkbox"] {
+                width: 16px;
+                height: 16px;
+            }
+            #controls {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 5px;
+            }
+            #controls button, #import-zip-label, #import-txt-label {
+                width: 100%;
+            }
+            #delete-selected, #export-selected-button {
+                padding: 10px;
+                font-size: 16px;
+            }
+            #add-memo, #export-selected-button {
+                font-size: 16px;
+            }
+            #search-bar input {
+                font-size: 14px;
+            }
+            /* 隐藏文字大小调整按钮以简化界面 */
+            #text-size-controls {
+                display: none;
+            }
+        }
+        /* Modal 样式 */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+        }
+        .modal-content {
+            background-color: var(--panel-bg-color);
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid var(--input-border-color);
+            width: 80%; /* Could be more or less, depending on screen size */
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: background-color var(--transition-duration) ease, border-color var(--transition-duration) ease;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-buttons button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color var(--transition-duration) ease, transform var(--transition-duration) ease;
+            font-size: 14px;
+        }
+        .modal-buttons .continue-btn {
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+        }
+        .modal-buttons .continue-btn:hover {
+            background-color: var(--button-hover-bg-color);
+            transform: scale(1.02);
+        }
+        .modal-buttons .cancel-btn {
+            background-color: var(--delete-button-bg-color);
+            color: var(--button-text-color);
+        }
+        .modal-buttons .cancel-btn:hover {
+            background-color: var(--delete-button-hover-bg-color);
+            transform: scale(1.02);
+        }
+        /* Save Notification */
+        #save-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #2ecc71;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: flex; /* Always display, manage visibility via opacity and transform */
+            align-items: center;
+            gap: 10px;
+            z-index: 1001;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        #save-notification.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        #save-notification svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* 新增版权声明样式 */
+        footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            color: var(--text-color);
+            background-color: var(--header-bg-color);
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        /* 新增：让四个按钮以 2×2 宫格排布 */
+        #action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 两列 */
+            grid-template-rows: auto auto;  /* 两行 */
+            gap: 10px;
+            margin-top: 10px;
+        }
+        #action-grid button,
+        #action-grid label {
+            width: 100%;
+            text-align: center;
+            margin: 0; 
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+<header>
+    <h1>三合笔记</h1>
+</header>
+
+<div id="container">
+    <div id="memo-list">
+        <button id="add-memo">
+            添加备忘录
+        </button>
+
+        <div id="search-bar">
+            <input type="text" id="search-input" placeholder="搜索备忘录..." title="输入关键词搜索备忘录">
+        </div>
+        <div id="select-all-container">
+            <input type="checkbox" id="select-all" title="选择或取消选择所有备忘录">
+            <label for="select-all">全选</label>
+        </div>
+        <!-- 排序方式选择 -->
+        <div id="sort-container" style="margin-bottom: 10px;">
+            <label for="sort-select" style="font-size: 14px; margin-right: 5px;">排序方式:</label>
+            <select id="sort-select" style="padding: 5px; border: 1px solid var(--input-border-color); border-radius: 5px;">
+                <option value="date-desc">日期倒序</option>
+                <option value="date-asc">日期顺序</option>
+                <option value="name-asc">名称排序</option>
+                <option value="custom">自定义排序</option>
+            </select>
+        </div>
+        <ul id="list" class="fade-in">
+            <!-- 备忘录列表 -->
+        </ul>
+
+        <!-- 新增：将 4 个按钮/标签放入 2×2 宫格 -->
+        <div id="action-grid">
+            <button id="delete-selected" title="删除选中的备忘录">
+                删除选中
+            </button>
+            <button id="export-selected-button" title="导出选中的备忘录为 ZIP">
+                导出选中
+            </button>
+            <label for="import-zip" id="import-zip-label" title="导入一个包含备忘录的 ZIP 文件">
+                导入 ZIP
+            </label>
+            <label for="import-txt" id="import-txt-label" title="导入一个包含纯文本的 .txt 文件">
+                导入 TXT
+            </label>
+        </div>
+
+        <!-- 隐藏的 file input -->
+        <input type="file" id="import-zip" accept=".zip" />
+        <input type="file" id="import-txt" accept=".txt" />
+    </div>
+
+    <div id="memo-editor">
+        <!-- 标题输入框 -->
+        <input
+          type="text"
+          id="title-input"
+          placeholder="在此输入备忘录标题"
+          title="请输入备忘录标题"
+        />
+
+        <!-- Quill 编辑器 -->
+        <div id="quill-editor">
+            <div id="toolbar">
+                <select class="ql-header">
+                    <option selected></option>
+                    <option value="1">标题I</option>
+                    <option value="2">标题II</option>
+                </select>
+                <button class="ql-bold" title="加粗"><strong>B</strong></button>
+                <button class="ql-italic" title="斜体"><em>I</em></button>
+                <button class="ql-underline" title="下划线"><u>U</u></button>
+                <button class="ql-strike" title="删除线"><s>S</s></button>
+                <button class="ql-list" value="ordered" title="有序列表">1.</button>
+                <button class="ql-list" value="bullet" title="无序列表">&bull;</button>
+                <button class="ql-link" title="插入链接">🔗</button>
+                <button class="ql-image" title="插入图片">🖼️</button>
+                <button class="ql-clean" title="清除格式">✖️</button>
+            </div>
+            <div id="editor-container" class="ql-container ql-snow"></div>
+        </div>
+
+        <div id="controls">
+            <button id="export-zip" title="导出所有备忘录为 ZIP">
+                导出所有
+            </button>
+            <button id="increase-font" title="增大文字">A+</button>
+            <button id="decrease-font" title="减小文字">A-</button>
+        </div>
+    </div>
+</div>
+
+<!-- Save Notification -->
+<div id="save-notification">
+    <!-- 绿色勾号 SVG -->
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+    </svg>
+    <span>已保存</span>
+</div>
+
+<!-- Modal for Screen Size Prompt -->
+<div id="mobile-modal" class="modal">
+    <div class="modal-content">
+        <p>当前屏幕尺寸较小，部分功能可能体验不佳。是否继续使用？</p>
+        <div class="modal-buttons">
+            <button class="continue-btn" id="continue-btn">继续</button>
+            <button class="cancel-btn" id="cancel-btn">不继续</button>
+        </div>
+    </div>
+</div>
+
+<!-- 新增：版权声明 -->
+<footer>
+    ©2025 xiaowugd
+</footer>
+
+<!-- 引入 Quill 富文本编辑器 -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+<!-- 引入 JSZip 库 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<!-- 引入 FileSaver 库，用于保存文件 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+<script>
+    (function() {
+        const memoListElement = document.getElementById('list');
+        const addMemoButton = document.getElementById('add-memo');
+        const exportZipButton = document.getElementById('export-zip');
+        const exportSelectedButton = document.getElementById('export-selected-button');
+        const importZipInput = document.getElementById('import-zip');
+        const deleteSelectedButton = document.getElementById('delete-selected');
+        const selectAllCheckbox = document.getElementById('select-all');
+        const searchInput = document.getElementById('search-input');
+        const increaseFontButton = document.getElementById('increase-font');
+        const decreaseFontButton = document.getElementById('decrease-font');
+        const saveNotification = document.getElementById('save-notification');
+        const sortSelect = document.getElementById('sort-select');
+
+        const mobileModal = document.getElementById('mobile-modal');
+        const continueBtn = document.getElementById('continue-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+
+        // 标题输入框
+        const titleInput = document.getElementById('title-input');
+
+        // 新增：TXT 导入相关
+        const importTxtInput = document.getElementById('import-txt');
+
+        let memos = {}; 
+        let currentMemoId = null;
+        let db;
+        let isAutoAdding = false; 
+        let isModified = false; 
+        let currentFontSize = 16; 
+
+        // 初始化 Quill 编辑器
+        const quill = new Quill('#editor-container', {
+            modules: {
+                toolbar: '#toolbar'
+            },
+            theme: 'snow'
+        });
+
+        // 当用户在 Quill 中输入内容时
+        quill.on('text-change', function(delta, oldDelta, source) {
+            if (source === 'user') {
+                if (currentMemoId) {
+                    isModified = true;
+                } else {
+                    // 如果还没有当前 Memo，但是用户开始输入了，则自动添加一个新的 Memo
+                    const content = quill.root.innerHTML.trim();
+                    if (content !== '<p><br></p>' && content !== '') {
+                        isAutoAdding = true;
+                        addMemo().then(() => {
+                            // 将用户输入的内容恢复到新建的备忘录中
+                            quill.setContents(quill.clipboard.convert(content));
+                            isAutoAdding = false;
+                            isModified = true;
+                        });
+                    }
+                }
+            }
+        });
+
+        // 标题输入框：只要用户输入，就标记 isModified
+        titleInput.addEventListener('input', function() {
+            isModified = true;
+        });
+
+        // 标题输入框：在失焦时立即保存（可选）
+        titleInput.addEventListener('blur', function() {
+            if (currentMemoId && isModified) {
+                updateCurrentMemo();
+                showSaveNotification();
+            }
+        });
+
+        // 初始化 IndexedDB
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('MemoDB', 4);
+
+                request.onerror = function(event) {
+                    console.error('IndexedDB 初始化失败', event);
+                    reject(event);
+                };
+
+                request.onsuccess = function(event) {
+                    db = event.target.result;
+                    resolve();
+                };
+
+                request.onupgradeneeded = function(event) {
+                    db = event.target.result;
+                    if (!db.objectStoreNames.contains('memos')) {
+                        const objectStore = db.createObjectStore('memos', { keyPath: 'id' });
+                        objectStore.createIndex('title', 'title', { unique: false });
+                        objectStore.createIndex('order', 'order', { unique: false });
+                    }
+                };
+            });
+        }
+
+        // 从 IndexedDB 加载所有备忘录
+        function loadMemos() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(['memos'], 'readonly');
+                const objectStore = transaction.objectStore('memos');
+                const request = objectStore.getAll();
+
+                request.onerror = function(event) {
+                    console.error('读取备忘录失败', event);
+                    reject(event);
+                };
+
+                request.onsuccess = function(event) {
+                    memos = {};
+                    event.target.result.forEach(memo => {
+                        memos[memo.id] = { 
+                            title: memo.title, 
+                            content: memo.content, 
+                            pinned: memo.pinned || false, 
+                            pinnedUntil: memo.pinnedUntil || null,
+                            lastEdit: memo.lastEdit || '未知时间',
+                            order: memo.order || Date.now(),
+                            versions: memo.versions || [] 
+                        };
+                    });
+                    renderMemoList();
+                    resolve();
+                };
+            });
+        }
+
+        // 保存所有备忘录到 IndexedDB
+        function saveAllMemos() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(['memos'], 'readwrite');
+                const objectStore = transaction.objectStore('memos');
+
+                // 清空现有数据
+                const clearRequest = objectStore.clear();
+                clearRequest.onsuccess = function() {
+                    // 添加所有 memos
+                    const addPromises = [];
+                    for (let id in memos) {
+                        const memo = { 
+                            id: id, 
+                            title: memos[id].title, 
+                            content: memos[id].content, 
+                            pinned: memos[id].pinned, 
+                            pinnedUntil: memos[id].pinnedUntil,
+                            lastEdit: memos[id].lastEdit,
+                            order: memos[id].order,
+                            versions: memos[id].versions 
+                        };
+                        const addRequest = objectStore.add(memo);
+                        addPromises.push(new Promise((res, rej) => {
+                            addRequest.onsuccess = res;
+                            addRequest.onerror = rej;
+                        }));
+                    }
+                    Promise.all(addPromises).then(resolve).catch(reject);
+                };
+                clearRequest.onerror = function(event) {
+                    console.error('清空备忘录失败', event);
+                    reject(event);
+                };
+            });
+        }
+
+        // 渲染备忘录列表
+        function renderMemoList(filter = '') {
+            memoListElement.innerHTML = '';
+            const fragment = document.createDocumentFragment();
+
+            // 获取排序方式
+            const sortValue = sortSelect.value;
+
+            // 将 memos 转换为数组
+            let memosArray = Object.keys(memos).map(id => ({ id, ...memos[id] }));
+
+            // 排序
+            switch(sortValue) {
+                case 'date-desc':
+                    memosArray.sort((a, b) => new Date(b.lastEdit) - new Date(a.lastEdit));
+                    break;
+                case 'date-asc':
+                    memosArray.sort((a, b) => new Date(a.lastEdit) - new Date(b.lastEdit));
+                    break;
+                case 'name-asc':
+                    memosArray.sort((a, b) => a.title.localeCompare(b.title));
+                    break;
+                case 'custom':
+                    memosArray.sort((a, b) => a.order - b.order);
+                    break;
+                default:
+                    // 默认用 id 排序
+                    memosArray.sort((a, b) => b.id - a.id);
+            }
+
+            // 根据搜索过滤
+            memosArray.forEach(memo => {
+                const { id, title, content, lastEdit } = memo;
+                if (filter) {
+                    const lowerFilter = filter.toLowerCase();
+                    // 提取纯文本用于搜索
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = content;
+                    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+                    if (!title.toLowerCase().includes(lowerFilter) && !textContent.toLowerCase().includes(lowerFilter)) {
+                        return;
+                    }
+                }
+
+                const li = document.createElement('li');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.dataset.id = id;
+                checkbox.id = `checkbox-${id}`;
+
+                const label = document.createElement('label');
+                label.htmlFor = `checkbox-${id}`;
+                label.textContent = title || '无标题备忘录';
+                label.style.flexGrow = '1';
+                label.style.cursor = 'pointer';
+                label.style.marginRight = '10px';
+                label.style.fontWeight = 'bold';
+
+                const editTime = document.createElement('span');
+                editTime.className = 'edit-time';
+                editTime.textContent = `最后编辑: ${lastEdit}`;
+
+                li.appendChild(checkbox);
+                li.appendChild(label);
+                li.appendChild(editTime);
+                li.dataset.id = id;
+
+                if (id === currentMemoId) {
+                    li.classList.add('active');
+                }
+
+                fragment.appendChild(li);
+            });
+
+            memoListElement.appendChild(fragment);
+
+            // 初始化 Sortable.js（只有在“自定义排序”时，拖拽排序才真正有用）
+            Sortable.create(memoListElement, {
+                animation: 150,
+                handle: 'label',
+                onEnd: function (evt) {
+                    const movedItem = memosArray.splice(evt.oldIndex, 1)[0];
+                    memosArray.splice(evt.newIndex, 0, movedItem);
+                    // 更新 order
+                    memosArray.forEach((memo, index) => {
+                        memos[memo.id].order = index;
+                    });
+                    saveAllMemos();
+                },
+            });
+        }
+
+        // 添加新备忘录
+        function addMemo() {
+            return new Promise((resolve) => {
+                const id = 'memo-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+                memos[id] = { 
+                    title: '新备忘录', 
+                    content: '<p></p>', 
+                    pinned: false, 
+                    pinnedUntil: null,
+                    lastEdit: new Date().toLocaleString(),
+                    order: Object.keys(memos).length,
+                    versions: [] 
+                };
+                saveAllMemos().then(() => {
+                    renderMemoList();
+                    selectMemo(id);
+                    resolve();
+                });
+            });
+        }
+
+        // 选择备忘录
+        function selectMemo(id) {
+            if (isModified) {
+                // 保存当前正在编辑的备忘录
+                updateCurrentMemo();
+                showSaveNotification();
+            }
+            currentMemoId = id;
+            renderMemoList(searchInput.value);
+
+            // 将选中的备忘录内容加载进 Quill
+            quill.setContents(quill.clipboard.convert(memos[id].content));
+
+            // 将标题输入框与当前标题同步
+            titleInput.value = memos[id].title || '无标题备忘录';
+
+            isModified = false;
+            // 恢复字体大小
+            const savedFontSize = localStorage.getItem(`fontSize-${id}`);
+            if (savedFontSize) {
+                quill.root.style.fontSize = `${savedFontSize}px`;
+                currentFontSize = parseInt(savedFontSize);
+            } else {
+                quill.root.style.fontSize = `${currentFontSize}px`;
+            }
+            // 滚动到视图中
+            const selectedLi = memoListElement.querySelector(`li[data-id="${id}"]`);
+            if (selectedLi) {
+                selectedLi.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // 更新当前备忘录内容并保存版本
+        function updateCurrentMemo() {
+            if (currentMemoId) {
+                const previousContent = memos[currentMemoId].content;
+                const newContent = quill.root.innerHTML;
+
+                // 从标题输入框获取最新标题
+                const newTitle = titleInput.value.trim();
+
+                const oldTitle = memos[currentMemoId].title;
+                if (previousContent !== newContent || oldTitle !== newTitle) {
+                    // 保存历史版本
+                    memos[currentMemoId].versions.push({
+                        content: previousContent,
+                        timestamp: new Date().toLocaleString()
+                    });
+
+                    // 更新标题和内容
+                    memos[currentMemoId].title = newTitle || '无标题备忘录';
+                    memos[currentMemoId].content = newContent;
+                    memos[currentMemoId].lastEdit = new Date().toLocaleString();
+
+                    // 保存字体大小
+                    const fontSize = parseInt(quill.root.style.fontSize) || 16;
+                    localStorage.setItem(`fontSize-${currentMemoId}`, fontSize);
+
+                    // 持久化到 IndexedDB
+                    saveAllMemos().then(() => {
+                        renderMemoList(searchInput.value);
+                    });
+                }
+            }
+        }
+
+        // 导出选定备忘录为 ZIP
+        async function exportSelectedMemosAsZip() {
+            const selectedCheckboxes = memoListElement.querySelectorAll('input[type="checkbox"]:checked');
+            if (selectedCheckboxes.length === 0) {
+                alert('请先选择要导出的备忘录。');
+                return;
+            }
+
+            const zip = new JSZip();
+            for (let cb of selectedCheckboxes) {
+                const id = cb.dataset.id;
+                const memo = memos[id];
+                const safeTitle = memo.title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5-_ ]/g, '') || '无标题';
+                // 这里你可自行决定是否在文件名中附加日期
+                const fileName = `${safeTitle}.html`;
+                zip.file(fileName, memo.content);
+            }
+
+            const content = await zip.generateAsync({type:"blob"});
+            saveAs(content, "selected_memos.zip");
+        }
+
+        // 导出所有备忘录为 ZIP
+        async function exportAllMemosAsZip() {
+            if (Object.keys(memos).length === 0) {
+                alert('没有备忘录可导出。');
+                return;
+            }
+
+            const zip = new JSZip();
+            for (let id in memos) {
+                const memo = memos[id];
+                const safeTitle = memo.title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5-_ ]/g, '') || '无标题';
+                const fileName = `${safeTitle}.html`;
+                zip.file(fileName, memo.content);
+            }
+            const content = await zip.generateAsync({type:"blob"});
+            saveAs(content, "all_memos.zip");
+        }
+
+        // 导入备忘录 ZIP 文件
+        function importMemosFromZip(file) {
+            return new Promise((resolve, reject) => {
+                const zip = new JSZip();
+                zip.loadAsync(file)
+                    .then(function(zip) {
+                        const promises = [];
+                        zip.forEach(function (relativePath, zipEntry) {
+                            if (!zipEntry.dir && zipEntry.name.endsWith('.html')) {
+                                const promise = zipEntry.async('string').then(function(content) {
+                                    const baseName = zipEntry.name.replace(/\.html$/i, '');
+                                    const id = 'memo-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+                                    memos[id] = { 
+                                        title: baseName, 
+                                        content: content, 
+                                        pinned: false, 
+                                        pinnedUntil: null,
+                                        lastEdit: '未知时间',
+                                        order: Object.keys(memos).length,
+                                        versions: [] 
+                                    };
+                                });
+                                promises.push(promise);
+                            }
+                        });
+                        return Promise.all(promises);
+                    })
+                    .then(function() {
+                        saveAllMemos().then(() => {
+                            renderMemoList(searchInput.value);
+                            showSaveNotification();
+                            alert('备忘录导入成功！');
+                            resolve();
+                        });
+                    })
+                    .catch(function(err) {
+                        console.error(err);
+                        alert('导入失败，请确保文件是有效的 ZIP 格式并包含 .html 文件。');
+                        reject(err);
+                    });
+            });
+        }
+
+        // 新增：导入 TXT 文件
+        function importMemosFromTxt(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const txtContent = e.target.result; // 纯文本字符串
+                    // 创建一个新 Memo
+                    const id = 'memo-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+                    // 这里 txt 内容我们可以直接放进 memo.content 中，如果要保持原换行，可以简单替换一下换行符
+                    const htmlContent = txtContent
+                        .split('\n').map(line => `<p>${line}</p>`).join('\n');
+
+                    // 你也可以让用户自己填写标题；此处示例里，取 TXT 文件名做标题
+                    const baseName = file.name.replace(/\.txt$/i, '');
+                    memos[id] = {
+                        title: baseName,
+                        content: htmlContent,
+                        pinned: false,
+                        pinnedUntil: null,
+                        lastEdit: new Date().toLocaleString(),
+                        order: Object.keys(memos).length,
+                        versions: []
+                    };
+                    // 保存到 IndexedDB 并刷新列表
+                    saveAllMemos().then(() => {
+                        renderMemoList(searchInput.value);
+                        showSaveNotification();
+                        alert('TXT 导入成功！');
+                        resolve();
+                    }).catch(err => {
+                        reject(err);
+                    });
+                };
+                reader.onerror = function(err) {
+                    alert('读取 TXT 文件出错！');
+                    reject(err);
+                };
+                reader.readAsText(file, 'utf-8');
+            });
+        }
+
+        // 删除选中的备忘录
+        function deleteSelectedMemos() {
+            const selectedCheckboxes = memoListElement.querySelectorAll('input[type="checkbox"]:checked');
+            if (selectedCheckboxes.length === 0) {
+                alert('请先选择要删除的备忘录。');
+                return;
+            }
+
+            if (!confirm(`确定要删除选中的 ${selectedCheckboxes.length} 个备忘录吗？`)) {
+                return;
+            }
+
+            selectedCheckboxes.forEach(cb => {
+                const id = cb.dataset.id;
+                delete memos[id];
+                localStorage.removeItem(`fontSize-${id}`);
+                if (id === currentMemoId) {
+                    currentMemoId = null;
+                    quill.setContents([]);
+                    titleInput.value = '';
+                }
+            });
+
+            saveAllMemos().then(() => {
+                renderMemoList(searchInput.value);
+                if (!currentMemoId && Object.keys(memos).length > 0) {
+                    const firstId = Object.keys(memos)[0];
+                    selectMemo(firstId);
+                }
+                selectAllCheckbox.checked = false;
+                if (currentMemoId === null) {
+                    showSaveNotification();
+                }
+            });
+        }
+
+        // 全选/取消全选功能
+        function toggleSelectAll() {
+            const isChecked = selectAllCheckbox.checked;
+            const checkboxes = memoListElement.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.checked = isChecked;
+            });
+        }
+
+        // 搜索功能
+        function searchMemos() {
+            const query = searchInput.value.trim();
+            renderMemoList(query);
+        }
+
+        // 显示保存通知
+        function showSaveNotification() {
+            saveNotification.classList.add('show');
+            setTimeout(() => {
+                saveNotification.classList.remove('show');
+            }, 3000);
+        }
+
+        // 事件监听
+        addMemoButton.addEventListener('click', () => {
+            addMemo().then(() => {
+                showSaveNotification();
+            });
+        });
+
+        memoListElement.addEventListener('click', function(e) {
+            // 如果点击的是复选框，阻止选择备忘录
+            if (e.target && e.target.type === 'checkbox') {
+                e.stopPropagation();
+                const checkboxes = memoListElement.querySelectorAll('input[type="checkbox"]');
+                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                selectAllCheckbox.checked = allChecked;
+                return;
+            }
+
+            if (e.target && (e.target.nodeName === 'LI' || e.target.nodeName === 'LABEL' || e.target.classList.contains('edit-time'))) {
+                let li = e.target;
+                if (li.nodeName !== 'LI') {
+                    li = li.parentElement;
+                }
+                const id = li.dataset.id;
+                if (id) {
+                    if (isAutoAdding) return;
+                    selectMemo(id);
+                }
+            }
+        });
+
+        exportZipButton.addEventListener('click', exportAllMemosAsZip);
+        exportSelectedButton.addEventListener('click', exportSelectedMemosAsZip);
+
+        importZipInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                importMemosFromZip(file).then(() => {
+                    showSaveNotification();
+                });
+                importZipInput.value = '';
+            }
+        });
+
+        // 监听 TXT 导入
+        importTxtInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                importMemosFromTxt(file).then(() => {
+                    showSaveNotification();
+                }).catch(err => {
+                    console.error('TXT 导入失败：', err);
+                });
+                importTxtInput.value = '';
+            }
+        });
+
+        deleteSelectedButton.addEventListener('click', deleteSelectedMemos);
+        selectAllCheckbox.addEventListener('change', toggleSelectAll);
+        searchInput.addEventListener('input', searchMemos);
+        sortSelect.addEventListener('change', function() {
+            renderMemoList(searchInput.value);
+        });
+
+        // 取消编辑时提示保存
+        document.addEventListener('click', function(e) {
+            const editor = document.getElementById('memo-editor');
+            const list = document.getElementById('memo-list');
+            if (!editor.contains(e.target) && !list.contains(e.target)) {
+                if (isModified && currentMemoId) {
+                    updateCurrentMemo();
+                    showSaveNotification();
+                }
+            }
+        });
+
+        // 检测屏幕大小并显示提示
+        function checkScreenSize() {
+            const isSmallScreen = window.innerWidth < 768;
+            if (isSmallScreen) {
+                openModal(mobileModal);
+            }
+        }
+
+        // 模态框控制
+        function openModal(modal) {
+            modal.style.display = 'block';
+        }
+
+        function closeModal(modal) {
+            modal.style.display = 'none';
+        }
+
+        // 处理屏幕大小模态框按钮
+        continueBtn.addEventListener('click', function() {
+            closeModal(mobileModal);
+        });
+
+        cancelBtn.addEventListener('click', function() {
+            window.history.back();
+        });
+
+        // 初始化应用
+        initDB().then(() => {
+            return loadMemos();
+        }).then(() => {
+            applyTheme();
+            checkScreenSize();
+            if (Object.keys(memos).length === 0) {
+                addMemo().then(() => {
+                    showSaveNotification();
+                });
+            }
+        }).catch(err => {
+            console.error('应用初始化失败', err);
+            alert('应用初始化失败，请检查浏览器是否支持 IndexedDB。');
+        });
+
+        // 应用主题（自动根据系统偏好）
+        function applyTheme() {
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = prefersDark ? 'dark' : 'light';
+            setTheme(theme);
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                const newTheme = e.matches ? 'dark' : 'light';
+                setTheme(newTheme);
+            });
+        }
+
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+        }
+
+        // 增大文字功能
+        increaseFontButton.addEventListener('click', function() {
+            if (currentMemoId) {
+                currentFontSize = parseInt(localStorage.getItem(`fontSize-${currentMemoId}`)) || 16;
+            }
+            if (currentFontSize < 24) {
+                currentFontSize += 2;
+                quill.root.style.fontSize = `${currentFontSize}px`;
+                if (currentMemoId) {
+                    localStorage.setItem(`fontSize-${currentMemoId}`, currentFontSize);
+                }
+            }
+        });
+
+        // 减小文字功能
+        decreaseFontButton.addEventListener('click', function() {
+            if (currentMemoId) {
+                currentFontSize = parseInt(localStorage.getItem(`fontSize-${currentMemoId}`)) || 16;
+            }
+            if (currentFontSize > 12) {
+                currentFontSize -= 2;
+                quill.root.style.fontSize = `${currentFontSize}px`;
+                if (currentMemoId) {
+                    localStorage.setItem(`fontSize-${currentMemoId}`, currentFontSize);
+                }
+            }
+        });
+
+    })();
+</script>
+
+</body>
+</html>
