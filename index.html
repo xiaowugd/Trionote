@@ -4,24 +4,25 @@
     <meta charset="UTF-8">
     <title>TrioNote</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <!-- 引入 Quill 富文本编辑器样式 -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <!-- 引入 Sortable.js 库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
         :root {
-            --bg-color: #f0f0f0;
-            --header-bg-color: #ffffff;
-            --header-text-color: #333333;
+            --bg-color: #f5f7fa;
+            --header-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            --header-text-color: #ffffff;
             --panel-bg-color: #ffffff;
             --text-color: #333333;
-            --button-bg-color: #e0e0e0;
-            --button-text-color: #333333;
-            --button-hover-bg-color: #cccccc;
-            --delete-button-bg-color: #ff4d4d;
-            --delete-button-hover-bg-color: #ff1a1a;
-            --input-border-color: #cccccc;
-            --input-focus-border-color: #333333;
+            --button-bg-color: #eef2ff;
+            --button-text-color: #4f46e5;
+            --button-hover-bg-color: #e0e7ff;
+            --delete-button-bg-color: #ef4444;
+            --delete-button-hover-bg-color: #dc2626;
+            --input-border-color: #d1d5db;
+            --input-focus-border-color: #6366f1;
             --scrollbar-thumb-color: rgba(0,0,0,0.2);
             --active-bg-color: rgba(0, 0, 0, 0.05);
             --tooltip-bg-color: rgba(0, 0, 0, 0.75);
@@ -34,18 +35,18 @@
             --transition-duration: 0.3s;
         }
         [data-theme="dark"] {
-            --bg-color: #1e1e1e;
-            --header-bg-color: #2c2c2c;
+            --bg-color: #1f2937;
+            --header-gradient: linear-gradient(135deg, #1e3a8a 0%, #111827 100%);
             --header-text-color: #ffffff;
-            --panel-bg-color: #2c2c2c;
-            --text-color: #e0e0e0;
-            --button-bg-color: #3a3a3a;
+            --panel-bg-color: #374151;
+            --text-color: #f3f4f6;
+            --button-bg-color: #4b5563;
             --button-text-color: #ffffff;
-            --button-hover-bg-color: #4e4e4e;
-            --delete-button-bg-color: #ff4d4d;
-            --delete-button-hover-bg-color: #ff1a1a;
-            --input-border-color: #555555;
-            --input-focus-border-color: #ffffff;
+            --button-hover-bg-color: #6b7280;
+            --delete-button-bg-color: #ef4444;
+            --delete-button-hover-bg-color: #dc2626;
+            --input-border-color: #6b7280;
+            --input-focus-border-color: #a5b4fc;
             --scrollbar-thumb-color: rgba(255,255,255,0.2);
             --active-bg-color: rgba(255, 255, 255, 0.05);
             --tooltip-bg-color: rgba(255, 255, 255, 0.9);
@@ -54,7 +55,7 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
@@ -71,13 +72,31 @@
             display: none;
             }
         header {
-            background-color: var(--header-bg-color);
+            background: var(--header-gradient);
             color: var(--header-text-color);
             padding: 1em;
             text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             position: relative;
             animation: slideDown 0.5s ease forwards;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        #theme-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            background: none;
+            border: none;
+            color: inherit;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform var(--transition-duration) ease;
+        }
+
+        #theme-toggle:hover {
+            transform: scale(1.1);
         }
         @keyframes slideDown {
             from { transform: translateY(-100%); }
@@ -488,7 +507,7 @@
             padding: 10px;
             font-size: 14px;
             color: var(--text-color);
-            background-color: var(--header-bg-color);
+            background: var(--header-gradient);
             box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
             margin-top: 20px;
         }
@@ -513,6 +532,7 @@
 
 <header>
     <h1>三合笔记</h1>
+    <button id="theme-toggle" title="切换主题">🌙</button>
 </header>
 
 <div id="container">
@@ -649,6 +669,7 @@
         const decreaseFontButton = document.getElementById('decrease-font');
         const saveNotification = document.getElementById('save-notification');
         const sortSelect = document.getElementById('sort-select');
+        const themeToggle = document.getElementById('theme-toggle');
 
         const mobileModal = document.getElementById('mobile-modal');
         const continueBtn = document.getElementById('continue-btn');
@@ -1284,17 +1305,23 @@
 
         // 应用主题（自动根据系统偏好）
         function applyTheme() {
-            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const theme = prefersDark ? 'dark' : 'light';
-            setTheme(theme);
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-                const newTheme = e.matches ? 'dark' : 'light';
-                setTheme(newTheme);
-            });
+            const stored = localStorage.getItem('theme');
+            if (stored) {
+                setTheme(stored);
+            } else {
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                setTheme(prefersDark ? 'dark' : 'light');
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                    if (!localStorage.getItem('theme')) {
+                        setTheme(e.matches ? 'dark' : 'light');
+                    }
+                });
+            }
         }
 
         function setTheme(theme) {
             document.body.setAttribute('data-theme', theme);
+            themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
         }
 
         // 增大文字功能
@@ -1323,6 +1350,13 @@
                     localStorage.setItem(`fontSize-${currentMemoId}`, currentFontSize);
                 }
             }
+        });
+
+        themeToggle.addEventListener('click', function() {
+            const current = document.body.getAttribute('data-theme') || 'light';
+            const newTheme = current === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+            localStorage.setItem('theme', newTheme);
         });
 
     })();
