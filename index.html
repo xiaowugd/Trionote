@@ -3,1330 +3,780 @@
 <head>
     <meta charset="UTF-8">
     <title>TrioNote</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 引入 Quill 富文本编辑器样式 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <!-- 引入 Sortable.js 库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
     <style>
         :root {
-            --bg-color: #f0f0f0;
-            --header-bg-color: #ffffff;
-            --header-text-color: #333333;
-            --panel-bg-color: #ffffff;
-            --text-color: #333333;
-            --button-bg-color: #e0e0e0;
-            --button-text-color: #333333;
-            --button-hover-bg-color: #cccccc;
-            --delete-button-bg-color: #ff4d4d;
-            --delete-button-hover-bg-color: #ff1a1a;
-            --input-border-color: #cccccc;
-            --input-focus-border-color: #333333;
-            --scrollbar-thumb-color: rgba(0,0,0,0.2);
-            --active-bg-color: rgba(0, 0, 0, 0.05);
-            --tooltip-bg-color: rgba(0, 0, 0, 0.75);
-            --tooltip-text-color: white;
-            --tooltip-padding: 6px 8px;
-            --tooltip-border-radius: 4px;
-            --tooltip-font-size: 12px;
-            --tooltip-transition: opacity 0.3s ease;
-            --toolline-color: rgba(224, 224, 224, 0.68);
-            --transition-duration: 0.3s;
+            --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --radius-xl: 18px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --ease-spring: cubic-bezier(0.25, 0.8, 0.25, 1);
+            --sidebar-w: 280px;
         }
+
+        [data-theme="light"] {
+            --bg-gradient: radial-gradient(circle at 50% 0%, #ffffff 0%, #eef2f3 100%);
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --sidebar-bg: rgba(255, 255, 255, 0.6);
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --accent-color: #007aff;
+            --border-color: rgba(255, 255, 255, 0.8);
+            --active-bg: #ffffff;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        }
+
         [data-theme="dark"] {
-            --bg-color: #1e1e1e;
-            --header-bg-color: #2c2c2c;
-            --header-text-color: #ffffff;
-            --panel-bg-color: #2c2c2c;
-            --text-color: #e0e0e0;
-            --button-bg-color: #3a3a3a;
-            --button-text-color: #ffffff;
-            --button-hover-bg-color: #4e4e4e;
-            --delete-button-bg-color: #ff4d4d;
-            --delete-button-hover-bg-color: #ff1a1a;
-            --input-border-color: #555555;
-            --input-focus-border-color: #ffffff;
-            --scrollbar-thumb-color: rgba(255,255,255,0.2);
-            --active-bg-color: rgba(255, 255, 255, 0.05);
-            --tooltip-bg-color: rgba(255, 255, 255, 0.9);
-            --tooltip-text-color: #000000;
-            --toolline-color: rgba(255, 255, 255, 0.9);
+            --bg-gradient: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            --glass-bg: rgba(30, 30, 30, 0.75);
+            --sidebar-bg: rgba(0, 0, 0, 0.3);
+            --text-primary: #f5f5f7;
+            --text-secondary: #a1a1a6;
+            --accent-color: #0a84ff;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --active-bg: rgba(255, 255, 255, 0.15);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
+
+        [data-theme="sunset"] {
+            --bg-gradient: linear-gradient(to right, #ffecd2 0%, #fcb69f 100%);
+            --glass-bg: rgba(255, 245, 240, 0.8);
+            --sidebar-bg: rgba(255, 255, 255, 0.45);
+            --text-primary: #5d4037;
+            --text-secondary: #8d6e63;
+            --accent-color: #ff7043;
+            --border-color: rgba(255, 255, 255, 0.5);
+            --active-bg: #fffbf0;
+            --shadow: 0 8px 32px rgba(255, 100, 50, 0.1);
+        }
+
+        [data-theme="forest"] {
+            --bg-gradient: linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%);
+            --glass-bg: rgba(240, 255, 245, 0.85);
+            --sidebar-bg: rgba(255, 255, 255, 0.5);
+            --text-primary: #1b5e20;
+            --text-secondary: #4caf50;
+            --accent-color: #2e7d32;
+            --border-color: rgba(255, 255, 255, 0.6);
+            --active-bg: #ffffff;
+            --shadow: 0 8px 32px rgba(0, 100, 0, 0.08);
+        }
+
+        [data-theme="ocean"] {
+            --bg-gradient: linear-gradient(to top, #30cfd0 0%, #330867 100%);
+            --glass-bg: rgba(20, 30, 50, 0.7);
+            --sidebar-bg: rgba(0, 0, 0, 0.25);
+            --text-primary: #e0f7fa;
+            --text-secondary: #80deea;
+            --accent-color: #00bcd4;
+            --border-color: rgba(255, 255, 255, 0.15);
+            --active-bg: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px rgba(0, 0, 50, 0.3);
+        }
+
+        [data-theme="aurora"] {
+            --bg-gradient: linear-gradient(to top, #5f72bd 0%, #9b23ea 100%);
+            --glass-bg: rgba(40, 20, 60, 0.6);
+            --sidebar-bg: rgba(0, 0, 0, 0.2);
+            --text-primary: #fff;
+            --text-secondary: #d1c4e9;
+            --accent-color: #e040fb;
+            --border-color: rgba(255, 255, 255, 0.2);
+            --active-bg: rgba(255, 255, 255, 0.15);
+            --shadow: 0 8px 32px rgba(50, 0, 100, 0.3);
+        }
+
+        [data-theme="cherry"] {
+            --bg-gradient: linear-gradient(to top, #fad0c4 0%, #ffd1ff 100%);
+            --glass-bg: rgba(255, 250, 250, 0.85);
+            --sidebar-bg: rgba(255, 255, 255, 0.5);
+            --text-primary: #880e4f;
+            --text-secondary: #d81b60;
+            --accent-color: #ec407a;
+            --border-color: rgba(255, 255, 255, 0.7);
+            --active-bg: #fff0f5;
+            --shadow: 0 8px 32px rgba(200, 0, 50, 0.08);
+        }
+
+        [data-theme="minimal"] {
+            --bg-gradient: #e0e0e0;
+            --glass-bg: #ffffff;
+            --sidebar-bg: #f5f5f5;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --accent-color: #424242;
+            --border-color: #e0e0e0;
+            --active-bg: #eeeeee;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease;
-            font-size: 16px;
-            /* 禁用编辑器外文本选中 */
-            user-select: none; 
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none; 
+            font-family: var(--font-stack);
+            margin: 0; padding: 0;
+            height: 100vh; overflow: hidden;
+            background: var(--bg-gradient);
+            background-size: 200% 200%;
+            animation: slowMove 25s ease infinite;
+            color: var(--text-primary);
+            transition: color 0.3s;
         }
-        #import-zip, #import-txt {
-            display: none;
-            }
-        header {
-            background-color: var(--header-bg-color);
-            color: var(--header-text-color);
-            padding: 1em;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: relative;
-            animation: slideDown 0.5s ease forwards;
+
+        @keyframes slowMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        #app-container {
+            display: flex; width: 100vw; height: 100vh;
+            padding: 20px; gap: 20px;
         }
-        @keyframes slideDown {
-            from { transform: translateY(-100%); }
-            to { transform: translateY(0); }
+
+        aside {
+            width: var(--sidebar-w); min-width: 260px;
+            background: var(--sidebar-bg);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            display: flex; flex-direction: column;
+            padding: 16px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            transition: transform 0.3s;
         }
-        #container {
-            display: flex;
-            padding: 20px;
-            gap: 20px;
-            transition: padding var(--transition-duration) ease;
+
+        .sidebar-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px;
         }
-        /* 备忘录列表 */
+        
+        .app-title {
+            font-size: 18px; font-weight: 800; letter-spacing: -0.5px;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .icon-btn {
+            background: transparent; border: none; color: var(--text-primary);
+            width: 32px; height: 32px; border-radius: var(--radius-sm);
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .icon-btn:hover { background: rgba(125,125,125,0.15); transform: scale(1.05); }
+        .icon-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+        .search-wrapper { position: relative; margin-bottom: 10px; }
+        .search-input {
+            width: 100%; padding: 8px 12px 8px 34px;
+            border-radius: 8px; border: none;
+            background: rgba(125,125,125,0.1);
+            color: var(--text-primary); font-size: 13px;
+            transition: all 0.2s;
+        }
+        .search-input:focus { background: rgba(125,125,125,0.2); box-shadow: 0 0 0 2px var(--accent-color); }
+        .search-icon {
+            position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+            width: 14px; height: 14px; opacity: 0.5; pointer-events: none;
+        }
+
+        .list-control {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 4px 8px; border-bottom: 1px solid var(--border-color); margin-bottom: 8px;
+        }
+        .select-all-btn { font-size: 12px; color: var(--accent-color); cursor: pointer; font-weight: 500; }
+
         #memo-list {
-            width: 30%;
-            background-color: var(--panel-bg-color);
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            height: 80vh;
-            overflow: hidden;
-            transition: box-shadow var(--transition-duration) ease, transform var(--transition-duration) ease, background-color var(--transition-duration) ease;
-            position: relative;
+            list-style: none; padding: 0; margin: 0;
+            flex-grow: 1; overflow-y: auto;
+            margin-right: -8px; padding-right: 8px;
         }
-        #memo-list:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transform: translateY(-2px);
+        
+        .memo-item {
+            padding: 10px; margin-bottom: 6px;
+            border-radius: var(--radius-md);
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: flex-start; gap: 10px;
         }
-        #memo-list button, #export-selected-button, #delete-selected {
-            border: none;
-            background-color: var(--button-bg-color);
-            color: var(--button-text-color);
-            padding: 10px 15px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color var(--transition-duration) ease, transform var(--transition-duration) ease;
-            width: 100%;
-            position: relative;
+        .memo-item:hover { background: rgba(125,125,125,0.05); }
+        .memo-item.active { background: var(--active-bg); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        
+        .checkbox-wrapper { padding-top: 3px; }
+        .custom-checkbox {
+            width: 16px; height: 16px; border: 1.5px solid var(--text-secondary);
+            border-radius: 5px; cursor: pointer; display: block; position: relative;
         }
-        #memo-list button:hover, #export-selected-button:hover, #delete-selected:hover {
-            background-color: var(--button-hover-bg-color);
-            transform: scale(1.02);
+        input[type="checkbox"] { display: none; }
+        input[type="checkbox"]:checked + .custom-checkbox {
+            background: var(--accent-color); border-color: var(--accent-color);
         }
-        #delete-selected {
-            background-color: var(--delete-button-bg-color);
+        input[type="checkbox"]:checked + .custom-checkbox::after {
+            content: ''; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px;
+            border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg);
         }
-        #delete-selected:hover {
-            background-color: var(--delete-button-hover-bg-color);
-        }
-        /* 导入按钮样式 */
-        #import-zip, #import-txt {
-            display: none;
-        }
-        #import-zip-label, #import-txt-label {
-            display: inline-block;
-            padding: 10px 0px;
-            font-size: 14px;
-            border-radius: 5px;
-            cursor: pointer;
-            background-color: var(--button-bg-color);
-            color: var(--button-text-color);
-            transition: background-color var(--transition-duration) ease, transform var(--transition-duration) ease;
-            width: 100%;
-            text-align: center;
-            position: relative;
-            margin-bottom: 10px;
-        }
-        #import-zip-label:hover, #import-txt-label:hover {
-            background-color: var(--button-hover-bg-color);
-            transform: scale(1.02);
-        }
-        #search-bar {
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all var(--transition-duration) ease;
-        }
-        #search-bar input {
-            flex-grow: 1;
-            padding: 8px;
-            border: 1px solid var(--input-border-color);
-            border-radius: 5px;
-            transition: border var(--transition-duration) ease;
-            background-color: var(--panel-bg-color);
-            color: var(--text-color);
-        }
-        #search-bar input::placeholder {
-            color: var(--text-color);
-            opacity: 0.7;
-        }
-        #search-bar input:focus {
-            border-color: var(--input-focus-border-color);
-            outline: none;
-        }
-        #select-all-container {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            margin-bottom: 10px;
-            transition: all var(--transition-duration) ease;
-            position: relative;
-        }
-        #select-all-container input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-        #list {
-            list-style: none;
-            padding: 0;
-            flex-grow: 1;
-            overflow-y: auto;
-            transition: all var(--transition-duration) ease;
-            cursor: grab;
-        }
-        #list li {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            cursor: pointer;
-            border-bottom: 1px solid #eee;
-            border-radius: 5px;
-            transition: background-color var(--transition-duration) ease, transform var(--transition-duration) ease;
-            position: relative;
-        }
-        #list li:hover, #list li.active {
-            background-color: var(--active-bg-color);
-            transform: translateX(2px);
-        }
-        #list li input[type="checkbox"] {
-            margin-right: 10px;
-            transition: transform var(--transition-duration) ease;
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-        #list li .edit-time {
-            margin-left: auto;
-            font-size: 12px;
-            color: var(--text-color);
-        }
-        /* 富文本编辑器容器 */
-        #memo-editor {
-            width: 68%;
-            background-color: var(--panel-bg-color);
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            transition: box-shadow var(--transition-duration) ease, transform var(--transition-duration) ease, background-color var(--transition-duration) ease, opacity var(--transition-duration) ease;
-            position: relative;
-            animation: fadeIn 0.5s ease forwards;
 
-            /* 允许在编辑器内选中文本 */
-            user-select: text;
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
+        .memo-info { flex-grow: 1; overflow: hidden; }
+        .memo-title { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .memo-date { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+        .sidebar-footer {
+            margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color);
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
         }
-        #memo-editor:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transform: translateY(-2px);
+        .footer-action {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            background: rgba(125,125,125,0.05); border: none; border-radius: 6px;
+            padding: 8px; font-size: 11px; color: var(--text-secondary); cursor: pointer;
+            transition: all 0.2s;
         }
-        /* 标题输入框样式 */
+        .footer-action:hover { background: rgba(125,125,125,0.15); color: var(--text-primary); }
+        .footer-action.danger:hover { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
+
+        main {
+            flex-grow: 1;
+            background: var(--glass-bg);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+            display: flex; flex-direction: column;
+            position: relative; overflow: hidden;
+        }
+
+        .editor-header {
+            padding: 20px 30px 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
         #title-input {
-            font-size: 18px;
-            margin-bottom: 10px;
-            padding: 8px;
-            border: 1px solid var(--input-border-color);
-            border-radius: 5px;
-            outline: none;
-            width: 100%;
+            width: 100%; font-size: 24px; font-weight: 700; background: transparent;
+            border: none; color: var(--text-primary); margin-bottom: 5px;
         }
-        #title-input:focus {
-            border-color: var(--input-focus-border-color);
+        .editor-tools { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary); }
+
+        #quill-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .ql-toolbar { border: none !important; padding: 10px 25px !important; border-bottom: 1px solid rgba(125,125,125,0.05) !important; }
+        .ql-container { border: none !important; font-size: 16px; }
+        .ql-editor { padding: 30px 40px !important; color: var(--text-primary); }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(125,125,125,0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.3); z-index: 2000;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s;
         }
-        /* Quill 编辑器样式调整 */
-        .ql-container {
-            height: 60vh;
-            border-radius: 5px;
-            background-color: var(--panel-bg-color);
-            color: var(--text-color);
-            transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease;
-            overflow: auto;
+        .modal-overlay.show { opacity: 1; }
+        
+        .settings-modal {
+            background: var(--active-bg);
+            width: 340px; padding: 20px; border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            transform: scale(0.9); transition: transform 0.3s var(--ease-spring);
+            border: 1px solid var(--border-color);
         }
-        .ql-editor {
-            background-color: var(--panel-bg-color);
-            color: var(--text-color);
-            transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease;
-            min-height: 300px;
-            font-size: 18px;
+        .modal-overlay.show .settings-modal { transform: scale(1); }
+        
+        .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .theme-btn {
+            height: 50px; border-radius: 10px; cursor: pointer;
+            border: 2px solid transparent; position: relative;
+            display: flex; align-items: flex-end; justify-content: center;
+            font-size: 10px; padding-bottom: 4px; font-weight: bold; color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden;
+            transition: transform 0.2s;
         }
-        .ql-toolbar {
-            border-radius: 5px 5px 0 0;
-            background-color: var(--toolline-color);
-            border-bottom: 1px solid var(--input-border-color);
-            transition: background-color var(--transition-duration) ease, border-color var(--transition-duration) ease;
+        .theme-btn:hover { transform: scale(1.05); }
+        .theme-btn.selected { border-color: var(--accent-color); box-shadow: 0 0 0 2px var(--active-bg); }
+        
+        .theme-btn[data-val="light"] { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); color:#333; }
+        .theme-btn[data-val="dark"] { background: linear-gradient(135deg, #232526 0%, #414345 100%); }
+        .theme-btn[data-val="sunset"] { background: linear-gradient(to right, #ffecd2 0%, #fcb69f 100%); }
+        .theme-btn[data-val="forest"] { background: linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%); color:#333; }
+        .theme-btn[data-val="ocean"] { background: linear-gradient(to top, #30cfd0 0%, #330867 100%); }
+        .theme-btn[data-val="aurora"] { background: linear-gradient(to top, #5f72bd 0%, #9b23ea 100%); }
+        .theme-btn[data-val="cherry"] { background: linear-gradient(to top, #fad0c4 0%, #ffd1ff 100%); color:#333; }
+        .theme-btn[data-val="minimal"] { background: #e0e0e0; color:#333; }
+        
+        .system-option {
+            grid-column: span 3; background: rgba(125,125,125,0.1); color: var(--text-primary);
+            display: flex; align-items: center; justify-content: center; height: 36px;
+            border-radius: 8px; font-size: 12px; cursor: pointer; gap: 6px;
         }
-        /* 控制按钮 */
-        #controls {
-            margin-top: 10px;
-            text-align: right;
-            display: flex;
-            gap: 10px;
-            position: relative;
-            animation: fadeIn 0.5s ease forwards;
+        .system-option.selected { background: var(--accent-color); color: white; }
+
+        #toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            background: rgba(0,0,0,0.85); color: white; padding: 10px 24px; border-radius: 30px;
+            font-size: 14px; font-weight: 500; z-index: 3000; transition: all 0.5s var(--ease-spring);
+            backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-        #controls button {
-            padding: 10px 15px;
-            font-size: 14px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color var(--transition-duration) ease, transform var(--transition-duration) ease;
-            background-color: var(--button-bg-color);
-            color: var(--button-text-color);
-            border: none;
-            position: relative;
-        }
-        #controls button:hover {
-            background-color: var(--button-hover-bg-color);
-            transform: scale(1.02);
-        }
-        /* 分割线按钮样式 */
-        .ql-divider {
-            border: none;
-            background: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        /* 自定义工具提示 */
-        .tooltip {
-            position: absolute;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--tooltip-bg-color);
-            color: var(--tooltip-text-color);
-            padding: var(--tooltip-padding);
-            border-radius: var(--tooltip-border-radius);
-            font-size: var(--tooltip-font-size);
-            white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease;
-            z-index: 1;
-        }
-        .tooltip::after {
-            content: '';
-            position: absolute;
-            top: 100%; /* At the bottom of the tooltip */
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: var(--tooltip-bg-color) transparent transparent transparent;
-        }
-        /* 显示工具提示 */
-        button:hover .tooltip,
-        label:hover .tooltip {
-            opacity: 1;
-            visibility: visible;
-        }
-        /* 滑动动画 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        /* Scrollbar Styling */
-        #memo-list::-webkit-scrollbar, #list::-webkit-scrollbar {
-            width: 8px;
-        }
-        #memo-list::-webkit-scrollbar-thumb, #list::-webkit-scrollbar-thumb {
-            background-color: var(--scrollbar-thumb-color);
-            border-radius: 4px;
-        }
-        /* 响应式设计 */
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
         @media (max-width: 768px) {
-            #container {
-                flex-direction: column;
-                padding: 10px;
-                gap: 10px;
-            }
-            #memo-list, #memo-editor {
-                width: 100%;
-                height: auto;
-            }
-            .ql-container {
-                height: 40vh;
-            }
-            #list li {
-                padding: 8px;
-            }
-            #list li input[type="checkbox"] {
-                width: 16px;
-                height: 16px;
-            }
-            #controls {
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 5px;
-            }
-            #controls button, #import-zip-label, #import-txt-label {
-                width: 100%;
-            }
-            #delete-selected, #export-selected-button {
-                padding: 10px;
-                font-size: 16px;
-            }
-            #add-memo, #export-selected-button {
-                font-size: 16px;
-            }
-            #search-bar input {
-                font-size: 14px;
-            }
-            /* 隐藏文字大小调整按钮以简化界面 */
-            #text-size-controls {
-                display: none;
-            }
-        }
-        /* Modal 样式 */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
-        }
-        .modal-content {
-            background-color: var(--panel-bg-color);
-            margin: 15% auto; /* 15% from the top and centered */
-            padding: 20px;
-            border: 1px solid var(--input-border-color);
-            width: 80%; /* Could be more or less, depending on screen size */
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: background-color var(--transition-duration) ease, border-color var(--transition-duration) ease;
-        }
-        .modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .modal-buttons button {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color var(--transition-duration) ease, transform var(--transition-duration) ease;
-            font-size: 14px;
-        }
-        .modal-buttons .continue-btn {
-            background-color: var(--button-bg-color);
-            color: var(--button-text-color);
-        }
-        .modal-buttons .continue-btn:hover {
-            background-color: var(--button-hover-bg-color);
-            transform: scale(1.02);
-        }
-        .modal-buttons .cancel-btn {
-            background-color: var(--delete-button-bg-color);
-            color: var(--button-text-color);
-        }
-        .modal-buttons .cancel-btn:hover {
-            background-color: var(--delete-button-hover-bg-color);
-            transform: scale(1.02);
-        }
-        /* Save Notification */
-        #save-notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #2ecc71;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            display: flex; /* Always display, manage visibility via opacity and transform */
-            align-items: center;
-            gap: 10px;
-            z-index: 1001;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            opacity: 0;
-            transform: scale(0.8);
-            pointer-events: none;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        #save-notification.show {
-            opacity: 1;
-            transform: scale(1);
-        }
-        #save-notification svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* 新增版权声明样式 */
-        footer {
-            text-align: center;
-            padding: 10px;
-            font-size: 14px;
-            color: var(--text-color);
-            background-color: var(--header-bg-color);
-            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        }
-
-        /* 新增：让四个按钮以 2×2 宫格排布 */
-        #action-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* 两列 */
-            grid-template-rows: auto auto;  /* 两行 */
-            gap: 10px;
-            margin-top: 10px;
-        }
-        #action-grid button,
-        #action-grid label {
-            width: 100%;
-            text-align: center;
-            margin: 0; 
+            #app-container { flex-direction: column; padding: 10px; gap: 10px; }
+            aside { width: 100%; height: 45vh; }
+            main { height: 55vh; }
+            .ql-editor { padding: 15px !important; }
         }
     </style>
 </head>
 <body data-theme="light">
 
-<header>
-    <h1>三合笔记</h1>
-</header>
+<div id="app-container">
+    <aside>
+        <div class="sidebar-header">
+            <div class="app-title">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                TrioNote
+            </div>
+            <div style="display:flex; gap:5px;">
+                <button class="icon-btn" id="btn-settings" title="主题设置">
+                    <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z"/></svg>
+                </button>
+                <button class="icon-btn" id="add-memo" title="新建">
+                    <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                </button>
+            </div>
+        </div>
 
-<div id="container">
-    <div id="memo-list">
-        <button id="add-memo">
-            添加备忘录
-        </button>
+        <div class="search-wrapper">
+            <svg class="search-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" class="search-input" id="search-input" placeholder="搜索内容...">
+        </div>
+        
+        <div class="list-control">
+            <span style="font-size:11px; color:var(--text-secondary); font-weight:600;">备忘录清单</span>
+            <span class="select-all-btn" id="toggle-select-all">全选</span>
+        </div>
 
-        <div id="search-bar">
-            <input type="text" id="search-input" placeholder="搜索备忘录..." title="输入关键词搜索备忘录">
-        </div>
-        <div id="select-all-container">
-            <input type="checkbox" id="select-all" title="选择或取消选择所有备忘录">
-            <label for="select-all">全选</label>
-        </div>
-        <!-- 排序方式选择 -->
-        <div id="sort-container" style="margin-bottom: 10px;">
-            <label for="sort-select" style="font-size: 14px; margin-right: 5px;">排序方式:</label>
-            <select id="sort-select" style="padding: 5px; border: 1px solid var(--input-border-color); border-radius: 5px;">
-                <option value="date-desc">日期倒序</option>
-                <option value="date-asc">日期顺序</option>
-                <option value="name-asc">名称排序</option>
-                <option value="custom">自定义排序</option>
-            </select>
-        </div>
-        <ul id="list" class="fade-in">
-            <!-- 备忘录列表 -->
+        <ul id="memo-list">
         </ul>
 
-        <!-- 新增：将 4 个按钮/标签放入 2×2 宫格 -->
-        <div id="action-grid">
-            <button id="delete-selected" title="删除选中的备忘录">
-                删除选中
-            </button>
-            <button id="export-selected-button" title="导出选中的备忘录为 ZIP">
-                导出选中
-            </button>
-            <label for="import-zip" id="import-zip-label" title="导入一个包含备忘录的 ZIP 文件">
-                导入 ZIP
+        <div class="sidebar-footer">
+            <label class="footer-action" for="import-zip">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> ZIP导入
             </label>
-            <label for="import-txt" id="import-txt-label" title="导入一个包含纯文本的 .txt 文件">
-                导入 TXT
+            <label class="footer-action" for="import-txt">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg> TXT导入
             </label>
+            <button class="footer-action" id="export-selected">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg> 导出选中
+            </button>
+            <button class="footer-action danger" id="delete-selected">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> 删除
+            </button>
         </div>
+    </aside>
 
-        <!-- 隐藏的 file input -->
-        <input type="file" id="import-zip" accept=".zip" />
-        <input type="file" id="import-txt" accept=".txt" />
-    </div>
-
-    <div id="memo-editor">
-        <!-- 标题输入框 -->
-        <input
-          type="text"
-          id="title-input"
-          placeholder="在此输入备忘录标题"
-          title="请输入备忘录标题"
-        />
-
-        <!-- Quill 编辑器 -->
-        <div id="quill-editor">
-            <div id="toolbar">
-                <select class="ql-header">
-                    <option selected></option>
-                    <option value="1">标题I</option>
-                    <option value="2">标题II</option>
-                </select>
-                <button class="ql-bold" title="加粗"><strong>B</strong></button>
-                <button class="ql-italic" title="斜体"><em>I</em></button>
-                <button class="ql-underline" title="下划线"><u>U</u></button>
-                <button class="ql-strike" title="删除线"><s>S</s></button>
-                <button class="ql-list" value="ordered" title="有序列表">1.</button>
-                <button class="ql-list" value="bullet" title="无序列表">&bull;</button>
-                <button class="ql-link" title="插入链接">🔗</button>
-                <button class="ql-image" title="插入图片">🖼️</button>
-                <button class="ql-clean" title="清除格式">✖️</button>
+    <main>
+        <div id="editor-ui" style="display:flex; flex-direction:column; height:100%;">
+            <div class="editor-header">
+                <input type="text" id="title-input" placeholder="无标题">
+                <div class="editor-tools">
+                    <span id="last-edit-time">刚刚</span>
+                    <div>
+                        <button class="icon-btn" onclick="adjustFont(2)" title="放大">A+</button>
+                        <button class="icon-btn" onclick="adjustFont(-2)" title="缩小">A-</button>
+                        <button class="icon-btn" id="export-all" title="备份全部">
+                            <svg viewBox="0 0 24 24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg>
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div id="editor-container" class="ql-container ql-snow"></div>
+            <div id="quill-container">
+                <div id="editor"></div>
+            </div>
         </div>
 
-        <div id="controls">
-            <button id="export-zip" title="导出所有备忘录为 ZIP">
-                导出所有
-            </button>
-            <button id="increase-font" title="增大文字">A+</button>
-            <button id="decrease-font" title="减小文字">A-</button>
+        <div id="empty-state" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; color:var(--text-secondary); display:none;">
+            <svg viewBox="0 0 24 24" width="64" height="64" fill="currentColor" style="opacity:0.2"><path d="M13 11h-2v3H8v2h3v3h2v-3h3v-2h-3zm1-9H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 18H6V4h7v5h5v11z"/></svg>
+            <p>选择或新建备忘录</p>
+        </div>
+    </main>
+</div>
+
+<input type="file" id="import-zip" style="display:none" accept=".zip">
+<input type="file" id="import-txt" style="display:none" accept=".txt">
+
+<div class="modal-overlay" id="settings-modal">
+    <div class="settings-modal">
+        <h3 style="margin:0 0 15px 0; color:var(--text-primary);">个性化主题</h3>
+        
+        <div class="system-option" id="system-theme-btn">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg>
+            跟随系统设置
+        </div>
+
+        <div class="theme-grid">
+            <div class="theme-btn" data-val="light">Light</div>
+            <div class="theme-btn" data-val="dark">Dark</div>
+            <div class="theme-btn" data-val="sunset">Sunset</div>
+            <div class="theme-btn" data-val="forest">Forest</div>
+            <div class="theme-btn" data-val="ocean">Ocean</div>
+            <div class="theme-btn" data-val="aurora">Aurora</div>
+            <div class="theme-btn" data-val="cherry">Cherry</div>
+            <div class="theme-btn" data-val="minimal">Gray</div>
+        </div>
+        
+        <div style="margin-top:20px; text-align:right">
+            <button class="icon-btn" onclick="toggleModal('settings-modal', false)" style="background:var(--accent-color); color:white; width:auto; padding:0 20px;">完成</button>
         </div>
     </div>
 </div>
 
-<!-- Save Notification -->
-<div id="save-notification">
-    <!-- 绿色勾号 SVG -->
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-    </svg>
-    <span>已保存</span>
-</div>
-
-<!-- Modal for Screen Size Prompt -->
-<div id="mobile-modal" class="modal">
-    <div class="modal-content">
-        <p>当前屏幕尺寸较小，部分功能可能体验不佳。是否继续使用？</p>
-        <div class="modal-buttons">
-            <button class="continue-btn" id="continue-btn">继续</button>
-            <button class="cancel-btn" id="cancel-btn">不继续</button>
-        </div>
-    </div>
-</div>
-
-<!-- 新增：版权声明 -->
-<footer>
-    ©2025 xiaowugd
-</footer>
-
-<!-- 引入 Quill 富文本编辑器 -->
-<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-<!-- 引入 JSZip 库 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<!-- 引入 FileSaver 库，用于保存文件 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<div id="toast">已保存</div>
 
 <script>
-    (function() {
-        const memoListElement = document.getElementById('list');
-        const addMemoButton = document.getElementById('add-memo');
-        const exportZipButton = document.getElementById('export-zip');
-        const exportSelectedButton = document.getElementById('export-selected-button');
-        const importZipInput = document.getElementById('import-zip');
-        const deleteSelectedButton = document.getElementById('delete-selected');
-        const selectAllCheckbox = document.getElementById('select-all');
-        const searchInput = document.getElementById('search-input');
-        const increaseFontButton = document.getElementById('increase-font');
-        const decreaseFontButton = document.getElementById('decrease-font');
-        const saveNotification = document.getElementById('save-notification');
-        const sortSelect = document.getElementById('sort-select');
+    const ThemeManager = {
+        init() {
+            const saved = localStorage.getItem('theme') || 'system';
+            this.setTheme(saved);
+            
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                if (localStorage.getItem('theme') === 'system') this.applySystemTheme();
+            });
 
-        const mobileModal = document.getElementById('mobile-modal');
-        const continueBtn = document.getElementById('continue-btn');
-        const cancelBtn = document.getElementById('cancel-btn');
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.onclick = () => this.setTheme(btn.dataset.val);
+            });
+            document.getElementById('system-theme-btn').onclick = () => this.setTheme('system');
+        },
+        setTheme(name) {
+            localStorage.setItem('theme', name);
+            
+            document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('selected', b.dataset.val === name));
+            document.getElementById('system-theme-btn').classList.toggle('selected', name === 'system');
 
-        // 标题输入框
-        const titleInput = document.getElementById('title-input');
+            if (name === 'system') this.applySystemTheme();
+            else document.body.setAttribute('data-theme', name);
+        },
+        applySystemTheme() {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        }
+    };
 
-        // 新增：TXT 导入相关
-        const importTxtInput = document.getElementById('import-txt');
+    let db, memos = {}, currentId = null, quill, saveTimer;
 
-        let memos = {}; 
-        let currentMemoId = null;
-        let db;
-        let isAutoAdding = false; 
-        let isModified = false; 
-        let currentFontSize = 16; 
-
-        // 初始化 Quill 编辑器
-        const quill = new Quill('#editor-container', {
-            modules: {
-                toolbar: '#toolbar'
-            },
-            theme: 'snow'
+    function init() {
+        ThemeManager.init();
+        
+        quill = new Quill('#editor', {
+            theme: 'snow',
+            modules: { toolbar: [
+                [{ 'header': [1, 2, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link', 'image', 'clean']
+            ]},
+            placeholder: '在此输入内容...'
         });
 
-        // 当用户在 Quill 中输入内容时
-        quill.on('text-change', function(delta, oldDelta, source) {
-            if (source === 'user') {
-                if (currentMemoId) {
-                    isModified = true;
-                } else {
-                    // 如果还没有当前 Memo，但是用户开始输入了，则自动添加一个新的 Memo
-                    const content = quill.root.innerHTML.trim();
-                    if (content !== '<p><br></p>' && content !== '') {
-                        isAutoAdding = true;
-                        addMemo().then(() => {
-                            // 将用户输入的内容恢复到新建的备忘录中
-                            quill.setContents(quill.clipboard.convert(content));
-                            isAutoAdding = false;
-                            isModified = true;
-                        });
-                    }
-                }
-            }
+        const req = indexedDB.open('TrioNote', 1);
+        req.onupgradeneeded = e => {
+            const db = e.target.result;
+            if(!db.objectStoreNames.contains('memos')) db.createObjectStore('memos', { keyPath: 'id' });
+        };
+        req.onsuccess = e => {
+            db = e.target.result;
+            loadData();
+        };
+
+        bindEvents();
+    }
+
+    function bindEvents() {
+        document.getElementById('add-memo').onclick = createMemo;
+        document.getElementById('btn-settings').onclick = () => toggleModal('settings-modal', true);
+        document.getElementById('search-input').oninput = renderList;
+        document.getElementById('toggle-select-all').onclick = toggleSelectAll;
+        
+        document.getElementById('import-zip').onchange = (e) => handleImport(e, 'zip');
+        document.getElementById('import-txt').onchange = (e) => handleImport(e, 'txt');
+        document.getElementById('export-selected').onclick = () => exportMemos(true);
+        document.getElementById('export-all').onclick = () => exportMemos(false);
+        document.getElementById('delete-selected').onclick = deleteSelected;
+
+        document.getElementById('title-input').addEventListener('input', debounceSave);
+        quill.on('text-change', (delta, old, source) => {
+            if(source === 'user') debounceSave();
         });
+    }
 
-        // 标题输入框：只要用户输入，就标记 isModified
-        titleInput.addEventListener('input', function() {
-            isModified = true;
-        });
-
-        // 标题输入框：在失焦时立即保存（可选）
-        titleInput.addEventListener('blur', function() {
-            if (currentMemoId && isModified) {
-                updateCurrentMemo();
-                showSaveNotification();
+    function loadData() {
+        const tx = db.transaction('memos', 'readonly');
+        tx.objectStore('memos').getAll().onsuccess = e => {
+            const arr = e.target.result;
+            memos = arr.reduce((acc, cur) => ({...acc, [cur.id]: cur}), {});
+            
+            if(arr.length > 0 && typeof arr[0].order === 'undefined') {
+                 arr.forEach((m, i) => memos[m.id].order = i);
             }
-        });
-
-        // 初始化 IndexedDB
-        function initDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open('MemoDB', 4);
-
-                request.onerror = function(event) {
-                    console.error('IndexedDB 初始化失败', event);
-                    reject(event);
-                };
-
-                request.onsuccess = function(event) {
-                    db = event.target.result;
-                    resolve();
-                };
-
-                request.onupgradeneeded = function(event) {
-                    db = event.target.result;
-                    if (!db.objectStoreNames.contains('memos')) {
-                        const objectStore = db.createObjectStore('memos', { keyPath: 'id' });
-                        objectStore.createIndex('title', 'title', { unique: false });
-                        objectStore.createIndex('order', 'order', { unique: false });
-                    }
-                };
-            });
-        }
-
-        // 从 IndexedDB 加载所有备忘录
-        function loadMemos() {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction(['memos'], 'readonly');
-                const objectStore = transaction.objectStore('memos');
-                const request = objectStore.getAll();
-
-                request.onerror = function(event) {
-                    console.error('读取备忘录失败', event);
-                    reject(event);
-                };
-
-                request.onsuccess = function(event) {
-                    memos = {};
-                    event.target.result.forEach(memo => {
-                        memos[memo.id] = { 
-                            title: memo.title, 
-                            content: memo.content, 
-                            pinned: memo.pinned || false, 
-                            pinnedUntil: memo.pinnedUntil || null,
-                            lastEdit: memo.lastEdit || '未知时间',
-                            order: memo.order || Date.now(),
-                            versions: memo.versions || [] 
-                        };
-                    });
-                    renderMemoList();
-                    resolve();
-                };
-            });
-        }
-
-        // 保存所有备忘录到 IndexedDB
-        function saveAllMemos() {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction(['memos'], 'readwrite');
-                const objectStore = transaction.objectStore('memos');
-
-                // 清空现有数据
-                const clearRequest = objectStore.clear();
-                clearRequest.onsuccess = function() {
-                    // 添加所有 memos
-                    const addPromises = [];
-                    for (let id in memos) {
-                        const memo = { 
-                            id: id, 
-                            title: memos[id].title, 
-                            content: memos[id].content, 
-                            pinned: memos[id].pinned, 
-                            pinnedUntil: memos[id].pinnedUntil,
-                            lastEdit: memos[id].lastEdit,
-                            order: memos[id].order,
-                            versions: memos[id].versions 
-                        };
-                        const addRequest = objectStore.add(memo);
-                        addPromises.push(new Promise((res, rej) => {
-                            addRequest.onsuccess = res;
-                            addRequest.onerror = rej;
-                        }));
-                    }
-                    Promise.all(addPromises).then(resolve).catch(reject);
-                };
-                clearRequest.onerror = function(event) {
-                    console.error('清空备忘录失败', event);
-                    reject(event);
-                };
-            });
-        }
-
-        // 渲染备忘录列表
-        function renderMemoList(filter = '') {
-            memoListElement.innerHTML = '';
-            const fragment = document.createDocumentFragment();
-
-            // 获取排序方式
-            const sortValue = sortSelect.value;
-
-            // 将 memos 转换为数组
-            let memosArray = Object.keys(memos).map(id => ({ id, ...memos[id] }));
-
-            // 排序
-            switch(sortValue) {
-                case 'date-desc':
-                    memosArray.sort((a, b) => new Date(b.lastEdit) - new Date(a.lastEdit));
-                    break;
-                case 'date-asc':
-                    memosArray.sort((a, b) => new Date(a.lastEdit) - new Date(b.lastEdit));
-                    break;
-                case 'name-asc':
-                    memosArray.sort((a, b) => a.title.localeCompare(b.title));
-                    break;
-                case 'custom':
-                    memosArray.sort((a, b) => a.order - b.order);
-                    break;
-                default:
-                    // 默认用 id 排序
-                    memosArray.sort((a, b) => b.id - a.id);
-            }
-
-            // 根据搜索过滤
-            memosArray.forEach(memo => {
-                const { id, title, content, lastEdit } = memo;
-                if (filter) {
-                    const lowerFilter = filter.toLowerCase();
-                    // 提取纯文本用于搜索
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = content;
-                    const textContent = tempDiv.textContent || tempDiv.innerText || '';
-                    if (!title.toLowerCase().includes(lowerFilter) && !textContent.toLowerCase().includes(lowerFilter)) {
-                        return;
-                    }
-                }
-
-                const li = document.createElement('li');
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.dataset.id = id;
-                checkbox.id = `checkbox-${id}`;
-
-                const label = document.createElement('label');
-                label.htmlFor = `checkbox-${id}`;
-                label.textContent = title || '无标题备忘录';
-                label.style.flexGrow = '1';
-                label.style.cursor = 'pointer';
-                label.style.marginRight = '10px';
-                label.style.fontWeight = 'bold';
-
-                const editTime = document.createElement('span');
-                editTime.className = 'edit-time';
-                editTime.textContent = `最后编辑: ${lastEdit}`;
-
-                li.appendChild(checkbox);
-                li.appendChild(label);
-                li.appendChild(editTime);
-                li.dataset.id = id;
-
-                if (id === currentMemoId) {
-                    li.classList.add('active');
-                }
-
-                fragment.appendChild(li);
-            });
-
-            memoListElement.appendChild(fragment);
-
-            // 初始化 Sortable.js（只有在“自定义排序”时，拖拽排序才真正有用）
-            Sortable.create(memoListElement, {
-                animation: 150,
-                handle: 'label',
-                onEnd: function (evt) {
-                    const movedItem = memosArray.splice(evt.oldIndex, 1)[0];
-                    memosArray.splice(evt.newIndex, 0, movedItem);
-                    // 更新 order
-                    memosArray.forEach((memo, index) => {
-                        memos[memo.id].order = index;
-                    });
-                    saveAllMemos();
-                },
-            });
-        }
-
-        // 添加新备忘录
-        function addMemo() {
-            return new Promise((resolve) => {
-                const id = 'memo-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-                memos[id] = { 
-                    title: '新备忘录', 
-                    content: '<p></p>', 
-                    pinned: false, 
-                    pinnedUntil: null,
-                    lastEdit: new Date().toLocaleString(),
-                    order: Object.keys(memos).length,
-                    versions: [] 
-                };
-                saveAllMemos().then(() => {
-                    renderMemoList();
-                    selectMemo(id);
-                    resolve();
-                });
-            });
-        }
-
-        // 选择备忘录
-        function selectMemo(id) {
-            if (isModified) {
-                // 保存当前正在编辑的备忘录
-                updateCurrentMemo();
-                showSaveNotification();
-            }
-            currentMemoId = id;
-            renderMemoList(searchInput.value);
-
-            // 将选中的备忘录内容加载进 Quill
-            quill.setContents(quill.clipboard.convert(memos[id].content));
-
-            // 将标题输入框与当前标题同步
-            titleInput.value = memos[id].title || '无标题备忘录';
-
-            isModified = false;
-            // 恢复字体大小
-            const savedFontSize = localStorage.getItem(`fontSize-${id}`);
-            if (savedFontSize) {
-                quill.root.style.fontSize = `${savedFontSize}px`;
-                currentFontSize = parseInt(savedFontSize);
+            
+            renderList();
+            if(arr.length > 0) {
+                const first = arr.sort((a,b) => a.order - b.order)[0];
+                selectMemo(first.id);
             } else {
-                quill.root.style.fontSize = `${currentFontSize}px`;
+                showEmptyState(true);
             }
-            // 滚动到视图中
-            const selectedLi = memoListElement.querySelector(`li[data-id="${id}"]`);
-            if (selectedLi) {
-                selectedLi.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
+        };
+    }
 
-        // 更新当前备忘录内容并保存版本
-        function updateCurrentMemo() {
-            if (currentMemoId) {
-                const previousContent = memos[currentMemoId].content;
-                const newContent = quill.root.innerHTML;
+    function renderList() {
+        const list = document.getElementById('memo-list');
+        list.innerHTML = '';
+        const query = document.getElementById('search-input').value.toLowerCase();
+        
+        const sorted = Object.values(memos).sort((a,b) => (a.order || 0) - (b.order || 0));
 
-                // 从标题输入框获取最新标题
-                const newTitle = titleInput.value.trim();
+        sorted.forEach(m => {
+            if (query && !m.title.toLowerCase().includes(query) && !m.text.toLowerCase().includes(query)) return;
 
-                const oldTitle = memos[currentMemoId].title;
-                if (previousContent !== newContent || oldTitle !== newTitle) {
-                    // 保存历史版本
-                    memos[currentMemoId].versions.push({
-                        content: previousContent,
-                        timestamp: new Date().toLocaleString()
+            const li = document.createElement('li');
+            li.className = `memo-item ${m.id === currentId ? 'active' : ''}`;
+            li.setAttribute('data-id', m.id); 
+            li.onclick = (e) => {
+                if(e.target.type !== 'checkbox' && !e.target.classList.contains('custom-checkbox')) selectMemo(m.id);
+            };
+
+            li.innerHTML = `
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="cb-${m.id}" data-id="${m.id}">
+                    <label for="cb-${m.id}" class="custom-checkbox"></label>
+                </div>
+                <div class="memo-info">
+                    <div class="memo-title">${m.title || '无标题'}</div>
+                    <div class="memo-date">${formatDate(m.updatedAt)}</div>
+                </div>
+            `;
+            list.appendChild(li);
+        });
+
+        if(!query) {
+            new Sortable(list, {
+                animation: 150,
+                delay: 100,
+                onEnd: (evt) => {
+                    const items = Array.from(list.children);
+                    items.forEach((item, idx) => {
+                        const id = item.querySelector('input').dataset.id;
+                        memos[id].order = idx;
                     });
-
-                    // 更新标题和内容
-                    memos[currentMemoId].title = newTitle || '无标题备忘录';
-                    memos[currentMemoId].content = newContent;
-                    memos[currentMemoId].lastEdit = new Date().toLocaleString();
-
-                    // 保存字体大小
-                    const fontSize = parseInt(quill.root.style.fontSize) || 16;
-                    localStorage.setItem(`fontSize-${currentMemoId}`, fontSize);
-
-                    // 持久化到 IndexedDB
-                    saveAllMemos().then(() => {
-                        renderMemoList(searchInput.value);
-                    });
+                    saveAllOrder();
                 }
-            }
-        }
-
-        // 导出选定备忘录为 ZIP
-        async function exportSelectedMemosAsZip() {
-            const selectedCheckboxes = memoListElement.querySelectorAll('input[type="checkbox"]:checked');
-            if (selectedCheckboxes.length === 0) {
-                alert('请先选择要导出的备忘录。');
-                return;
-            }
-
-            const zip = new JSZip();
-            for (let cb of selectedCheckboxes) {
-                const id = cb.dataset.id;
-                const memo = memos[id];
-                const safeTitle = memo.title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5-_ ]/g, '') || '无标题';
-                // 这里你可自行决定是否在文件名中附加日期
-                const fileName = `${safeTitle}.html`;
-                zip.file(fileName, memo.content);
-            }
-
-            const content = await zip.generateAsync({type:"blob"});
-            saveAs(content, "selected_memos.zip");
-        }
-
-        // 导出所有备忘录为 ZIP
-        async function exportAllMemosAsZip() {
-            if (Object.keys(memos).length === 0) {
-                alert('没有备忘录可导出。');
-                return;
-            }
-
-            const zip = new JSZip();
-            for (let id in memos) {
-                const memo = memos[id];
-                const safeTitle = memo.title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5-_ ]/g, '') || '无标题';
-                const fileName = `${safeTitle}.html`;
-                zip.file(fileName, memo.content);
-            }
-            const content = await zip.generateAsync({type:"blob"});
-            saveAs(content, "all_memos.zip");
-        }
-
-        // 导入备忘录 ZIP 文件
-        function importMemosFromZip(file) {
-            return new Promise((resolve, reject) => {
-                const zip = new JSZip();
-                zip.loadAsync(file)
-                    .then(function(zip) {
-                        const promises = [];
-                        zip.forEach(function (relativePath, zipEntry) {
-                            if (!zipEntry.dir && zipEntry.name.endsWith('.html')) {
-                                const promise = zipEntry.async('string').then(function(content) {
-                                    const baseName = zipEntry.name.replace(/\.html$/i, '');
-                                    const id = 'memo-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-                                    memos[id] = { 
-                                        title: baseName, 
-                                        content: content, 
-                                        pinned: false, 
-                                        pinnedUntil: null,
-                                        lastEdit: '未知时间',
-                                        order: Object.keys(memos).length,
-                                        versions: [] 
-                                    };
-                                });
-                                promises.push(promise);
-                            }
-                        });
-                        return Promise.all(promises);
-                    })
-                    .then(function() {
-                        saveAllMemos().then(() => {
-                            renderMemoList(searchInput.value);
-                            showSaveNotification();
-                            alert('备忘录导入成功！');
-                            resolve();
-                        });
-                    })
-                    .catch(function(err) {
-                        console.error(err);
-                        alert('导入失败，请确保文件是有效的 ZIP 格式并包含 .html 文件。');
-                        reject(err);
-                    });
             });
         }
+    }
 
-        // 新增：导入 TXT 文件
-        function importMemosFromTxt(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const txtContent = e.target.result; // 纯文本字符串
-                    // 创建一个新 Memo
-                    const id = 'memo-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
-                    // 这里 txt 内容我们可以直接放进 memo.content 中，如果要保持原换行，可以简单替换一下换行符
-                    const htmlContent = txtContent
-                        .split('\n').map(line => `<p>${line}</p>`).join('\n');
+    function selectMemo(id) {
+        currentId = id;
+        showEmptyState(false);
+        const m = memos[id];
+        document.getElementById('title-input').value = m.title;
+        document.getElementById('last-edit-time').textContent = formatDate(m.updatedAt);
+        
+        const savedSize = localStorage.getItem(`fontsize-${id}`) || 16;
+        document.querySelector('.ql-editor').style.fontSize = savedSize + 'px';
 
-                    // 你也可以让用户自己填写标题；此处示例里，取 TXT 文件名做标题
-                    const baseName = file.name.replace(/\.txt$/i, '');
-                    memos[id] = {
-                        title: baseName,
-                        content: htmlContent,
-                        pinned: false,
-                        pinnedUntil: null,
-                        lastEdit: new Date().toLocaleString(),
-                        order: Object.keys(memos).length,
-                        versions: []
-                    };
-                    // 保存到 IndexedDB 并刷新列表
-                    saveAllMemos().then(() => {
-                        renderMemoList(searchInput.value);
-                        showSaveNotification();
-                        alert('TXT 导入成功！');
-                        resolve();
-                    }).catch(err => {
-                        reject(err);
-                    });
-                };
-                reader.onerror = function(err) {
-                    alert('读取 TXT 文件出错！');
-                    reject(err);
-                };
-                reader.readAsText(file, 'utf-8');
-            });
+        quill.setContents(quill.clipboard.convert(m.content), 'silent');
+        
+        document.querySelectorAll('.memo-item').forEach(el => el.classList.remove('active'));
+        const activeLi = document.querySelector(`input[data-id="${id}"]`)?.closest('li');
+        if(activeLi) activeLi.classList.add('active');
+    }
+
+    function createMemo() {
+        const id = 'memo_' + Date.now();
+        const newMemo = {
+            id,
+            title: '新备忘录',
+            content: '',
+            text: '',
+            updatedAt: new Date().toISOString(),
+            order: -1
+        };
+        Object.values(memos).forEach(m => m.order++);
+        newMemo.order = 0;
+        
+        memos[id] = newMemo;
+        saveToDB(newMemo);
+        saveAllOrder();
+        selectMemo(id);
+        renderList();
+        document.getElementById('title-input').focus();
+        document.getElementById('title-input').select();
+    }
+
+    function debounceSave() {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+            if(!currentId) return;
+            const m = memos[currentId];
+            m.title = document.getElementById('title-input').value;
+            m.content = quill.root.innerHTML;
+            m.text = quill.getText();
+            m.updatedAt = new Date().toISOString();
+            document.getElementById('last-edit-time').textContent = "刚刚";
+            
+            saveToDB(m);
+            renderList();
+            showToast('已自动保存');
+        }, 800);
+    }
+
+    function saveToDB(memo) {
+        const tx = db.transaction('memos', 'readwrite');
+        tx.objectStore('memos').put(memo);
+    }
+
+    function saveAllOrder() {
+        const tx = db.transaction('memos', 'readwrite');
+        const store = tx.objectStore('memos');
+        Object.values(memos).forEach(m => store.put(m));
+    }
+
+    async function exportMemos(onlySelected) {
+        let targets = [];
+        if(onlySelected) {
+            const checked = document.querySelectorAll('input[type="checkbox"]:checked');
+            if(checked.length === 0) return showToast('未选择条目');
+            checked.forEach(cb => targets.push(memos[cb.dataset.id]));
+        } else {
+            targets = Object.values(memos);
+            if(targets.length === 0) return showToast('无数据');
         }
 
-        // 删除选中的备忘录
-        function deleteSelectedMemos() {
-            const selectedCheckboxes = memoListElement.querySelectorAll('input[type="checkbox"]:checked');
-            if (selectedCheckboxes.length === 0) {
-                alert('请先选择要删除的备忘录。');
-                return;
-            }
+        const zip = new JSZip();
+        targets.forEach(m => {
+            const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${m.title}</title></head><body>${m.content}</body></html>`;
+            zip.file(`${m.title || 'untitled'}.html`, "\uFEFF" + html);
+        });
 
-            if (!confirm(`确定要删除选中的 ${selectedCheckboxes.length} 个备忘录吗？`)) {
-                return;
-            }
+        const blob = await zip.generateAsync({type:"blob"});
+        saveAs(blob, `TrioNote_${onlySelected?'Selected':'All'}.zip`);
+        showToast('导出成功');
+    }
 
-            selectedCheckboxes.forEach(cb => {
+    async function handleImport(e, type) {
+        const file = e.target.files[0];
+        if(!file) return;
+        
+        let count = 0;
+        const tx = db.transaction('memos', 'readwrite');
+        const store = tx.objectStore('memos');
+
+        if (type === 'zip') {
+            const zip = await JSZip.loadAsync(file);
+            const promises = [];
+            zip.forEach((path, entry) => {
+                if(entry.name.endsWith('.html') && !entry.dir) {
+                    promises.push(entry.async('string').then(content => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(content, 'text/html');
+                        addImportedMemo(entry.name.replace('.html',''), doc.body.innerHTML, doc.body.textContent, store);
+                        count++;
+                    }));
+                }
+            });
+            await Promise.all(promises);
+        } else if (type === 'txt') {
+            const content = await file.text();
+            const htmlContent = content.split('\n').map(line => `<p>${line}</p>`).join('');
+            addImportedMemo(file.name.replace('.txt',''), htmlContent, content, store);
+            count = 1;
+        }
+
+        renderList();
+        showToast(`成功导入 ${count} 条`);
+        e.target.value = '';
+    }
+
+    function addImportedMemo(title, content, text, store) {
+        const id = 'memo_' + Date.now() + Math.random();
+        const m = {
+            id, title, content, text,
+            updatedAt: new Date().toISOString(),
+            order: 0
+        };
+        memos[id] = m;
+        store.put(m);
+    }
+
+    function deleteSelected() {
+        const checked = document.querySelectorAll('input[type="checkbox"]:checked');
+        if(checked.length === 0) return;
+        
+        if(confirm(`删除 ${checked.length} 项?`)) {
+            const tx = db.transaction('memos', 'readwrite');
+            checked.forEach(cb => {
                 const id = cb.dataset.id;
                 delete memos[id];
-                localStorage.removeItem(`fontSize-${id}`);
-                if (id === currentMemoId) {
-                    currentMemoId = null;
-                    quill.setContents([]);
-                    titleInput.value = '';
+                tx.objectStore('memos').delete(id);
+                if(id === currentId) {
+                    currentId = null;
+                    showEmptyState(true);
                 }
             });
-
-            saveAllMemos().then(() => {
-                renderMemoList(searchInput.value);
-                if (!currentMemoId && Object.keys(memos).length > 0) {
-                    const firstId = Object.keys(memos)[0];
-                    selectMemo(firstId);
-                }
-                selectAllCheckbox.checked = false;
-                if (currentMemoId === null) {
-                    showSaveNotification();
-                }
-            });
+            renderList();
         }
+    }
 
-        // 全选/取消全选功能
-        function toggleSelectAll() {
-            const isChecked = selectAllCheckbox.checked;
-            const checkboxes = memoListElement.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(cb => {
-                cb.checked = isChecked;
-            });
+    function toggleSelectAll() {
+        const cbs = document.querySelectorAll('#memo-list input[type="checkbox"]');
+        const allChecked = Array.from(cbs).every(cb => cb.checked);
+        cbs.forEach(cb => cb.checked = !allChecked);
+    }
+
+    function toggleModal(id, show) {
+        const el = document.getElementById(id);
+        if(show) {
+            el.style.display = 'flex';
+            setTimeout(() => el.classList.add('show'), 10);
+        } else {
+            el.classList.remove('show');
+            setTimeout(() => el.style.display = 'none', 300);
         }
+    }
 
-        // 搜索功能
-        function searchMemos() {
-            const query = searchInput.value.trim();
-            renderMemoList(query);
+    function adjustFont(delta) {
+        if(!currentId) return;
+        const editor = document.querySelector('.ql-editor');
+        let current = parseInt(window.getComputedStyle(editor).fontSize) || 16;
+        current += delta;
+        editor.style.fontSize = current + 'px';
+        localStorage.setItem(`fontsize-${currentId}`, current);
+    }
+
+    function showEmptyState(show) {
+        document.getElementById('editor-ui').style.display = show ? 'none' : 'flex';
+        document.getElementById('empty-state').style.display = show ? 'block' : 'none';
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    function formatDate(iso) {
+        const d = new Date(iso);
+        const now = new Date();
+        if(d.toDateString() === now.toDateString()) {
+            return `${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
         }
+        return `${d.getMonth()+1}/${d.getDate()}`;
+    }
 
-        // 显示保存通知
-        function showSaveNotification() {
-            saveNotification.classList.add('show');
-            setTimeout(() => {
-                saveNotification.classList.remove('show');
-            }, 3000);
-        }
-
-        // 事件监听
-        addMemoButton.addEventListener('click', () => {
-            addMemo().then(() => {
-                showSaveNotification();
-            });
-        });
-
-        memoListElement.addEventListener('click', function(e) {
-            // 如果点击的是复选框，阻止选择备忘录
-            if (e.target && e.target.type === 'checkbox') {
-                e.stopPropagation();
-                const checkboxes = memoListElement.querySelectorAll('input[type="checkbox"]');
-                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-                selectAllCheckbox.checked = allChecked;
-                return;
-            }
-
-            if (e.target && (e.target.nodeName === 'LI' || e.target.nodeName === 'LABEL' || e.target.classList.contains('edit-time'))) {
-                let li = e.target;
-                if (li.nodeName !== 'LI') {
-                    li = li.parentElement;
-                }
-                const id = li.dataset.id;
-                if (id) {
-                    if (isAutoAdding) return;
-                    selectMemo(id);
-                }
-            }
-        });
-
-        exportZipButton.addEventListener('click', exportAllMemosAsZip);
-        exportSelectedButton.addEventListener('click', exportSelectedMemosAsZip);
-
-        importZipInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                importMemosFromZip(file).then(() => {
-                    showSaveNotification();
-                });
-                importZipInput.value = '';
-            }
-        });
-
-        // 监听 TXT 导入
-        importTxtInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                importMemosFromTxt(file).then(() => {
-                    showSaveNotification();
-                }).catch(err => {
-                    console.error('TXT 导入失败：', err);
-                });
-                importTxtInput.value = '';
-            }
-        });
-
-        deleteSelectedButton.addEventListener('click', deleteSelectedMemos);
-        selectAllCheckbox.addEventListener('change', toggleSelectAll);
-        searchInput.addEventListener('input', searchMemos);
-        sortSelect.addEventListener('change', function() {
-            renderMemoList(searchInput.value);
-        });
-
-        // 取消编辑时提示保存
-        document.addEventListener('click', function(e) {
-            const editor = document.getElementById('memo-editor');
-            const list = document.getElementById('memo-list');
-            if (!editor.contains(e.target) && !list.contains(e.target)) {
-                if (isModified && currentMemoId) {
-                    updateCurrentMemo();
-                    showSaveNotification();
-                }
-            }
-        });
-
-        // 检测屏幕大小并显示提示
-        function checkScreenSize() {
-            const isSmallScreen = window.innerWidth < 768;
-            if (isSmallScreen) {
-                openModal(mobileModal);
-            }
-        }
-
-        // 模态框控制
-        function openModal(modal) {
-            modal.style.display = 'block';
-        }
-
-        function closeModal(modal) {
-            modal.style.display = 'none';
-        }
-
-        // 处理屏幕大小模态框按钮
-        continueBtn.addEventListener('click', function() {
-            closeModal(mobileModal);
-        });
-
-        cancelBtn.addEventListener('click', function() {
-            window.history.back();
-        });
-
-        // 初始化应用
-        initDB().then(() => {
-            return loadMemos();
-        }).then(() => {
-            applyTheme();
-            checkScreenSize();
-            if (Object.keys(memos).length === 0) {
-                addMemo().then(() => {
-                    showSaveNotification();
-                });
-            }
-        }).catch(err => {
-            console.error('应用初始化失败', err);
-            alert('应用初始化失败，请检查浏览器是否支持 IndexedDB。');
-        });
-
-        // 应用主题（自动根据系统偏好）
-        function applyTheme() {
-            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const theme = prefersDark ? 'dark' : 'light';
-            setTheme(theme);
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-                const newTheme = e.matches ? 'dark' : 'light';
-                setTheme(newTheme);
-            });
-        }
-
-        function setTheme(theme) {
-            document.body.setAttribute('data-theme', theme);
-        }
-
-        // 增大文字功能
-        increaseFontButton.addEventListener('click', function() {
-            if (currentMemoId) {
-                currentFontSize = parseInt(localStorage.getItem(`fontSize-${currentMemoId}`)) || 16;
-            }
-            if (currentFontSize < 24) {
-                currentFontSize += 2;
-                quill.root.style.fontSize = `${currentFontSize}px`;
-                if (currentMemoId) {
-                    localStorage.setItem(`fontSize-${currentMemoId}`, currentFontSize);
-                }
-            }
-        });
-
-        // 减小文字功能
-        decreaseFontButton.addEventListener('click', function() {
-            if (currentMemoId) {
-                currentFontSize = parseInt(localStorage.getItem(`fontSize-${currentMemoId}`)) || 16;
-            }
-            if (currentFontSize > 12) {
-                currentFontSize -= 2;
-                quill.root.style.fontSize = `${currentFontSize}px`;
-                if (currentMemoId) {
-                    localStorage.setItem(`fontSize-${currentMemoId}`, currentFontSize);
-                }
-            }
-        });
-
-    })();
+    init();
 </script>
-
 </body>
 </html>
