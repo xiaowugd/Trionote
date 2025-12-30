@@ -2,37 +2,37 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>TrioNote</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
+    <title>Trionote</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
     <style>
         :root {
             --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-            --radius-xl: 18px;
+            --radius-xl: 20px;
             --radius-md: 12px;
             --radius-sm: 8px;
-            --ease-spring: cubic-bezier(0.25, 0.8, 0.25, 1);
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
             --sidebar-w: 280px;
         }
-
         [data-theme="light"] {
-            --bg-gradient: radial-gradient(circle at 50% 0%, #ffffff 0%, #eef2f3 100%);
-            --glass-bg: rgba(255, 255, 255, 0.8);
-            --sidebar-bg: rgba(255, 255, 255, 0.6);
+            --bg-gradient: radial-gradient(circle at 50% 0%, #ffffff 0%, #f2f2f7 100%);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --sidebar-bg: rgba(255, 255, 255, 0.65);
             --text-primary: #1d1d1f;
-            --text-secondary: #6e6e73;
+            --text-secondary: #86868b;
             --accent-color: #007aff;
-            --border-color: rgba(255, 255, 255, 0.8);
+            --border-color: rgba(0, 0, 0, 0.06);
             --active-bg: #ffffff;
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            --input-bg: rgba(0, 0, 0, 0.04);
+            --item-hover: rgba(0, 0, 0, 0.03);
+            --mobile-main-bg: #ffffff;
         }
-
         [data-theme="dark"] {
             --bg-gradient: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
             --glass-bg: rgba(30, 30, 30, 0.75);
@@ -42,9 +42,11 @@
             --accent-color: #0a84ff;
             --border-color: rgba(255, 255, 255, 0.1);
             --active-bg: rgba(255, 255, 255, 0.15);
-            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            --input-bg: rgba(255, 255, 255, 0.1);
+            --item-hover: rgba(255, 255, 255, 0.05);
+            --mobile-main-bg: #1c1c1e;
         }
-
         [data-theme="sunset"] {
             --bg-gradient: linear-gradient(to right, #ffecd2 0%, #fcb69f 100%);
             --glass-bg: rgba(255, 245, 240, 0.8);
@@ -54,9 +56,11 @@
             --accent-color: #ff7043;
             --border-color: rgba(255, 255, 255, 0.5);
             --active-bg: #fffbf0;
-            --shadow: 0 8px 32px rgba(255, 100, 50, 0.1);
+            --shadow: 0 15px 40px rgba(255, 100, 50, 0.15);
+            --input-bg: rgba(255, 255, 255, 0.4);
+            --item-hover: rgba(255, 255, 255, 0.3);
+            --mobile-main-bg: #fffbf0;
         }
-
         [data-theme="forest"] {
             --bg-gradient: linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%);
             --glass-bg: rgba(240, 255, 245, 0.85);
@@ -66,9 +70,11 @@
             --accent-color: #2e7d32;
             --border-color: rgba(255, 255, 255, 0.6);
             --active-bg: #ffffff;
-            --shadow: 0 8px 32px rgba(0, 100, 0, 0.08);
+            --shadow: 0 15px 40px rgba(0, 100, 0, 0.1);
+            --input-bg: rgba(255, 255, 255, 0.4);
+            --item-hover: rgba(255, 255, 255, 0.3);
+            --mobile-main-bg: #f1f8e9;
         }
-
         [data-theme="ocean"] {
             --bg-gradient: linear-gradient(to top, #30cfd0 0%, #330867 100%);
             --glass-bg: rgba(20, 30, 50, 0.7);
@@ -78,9 +84,11 @@
             --accent-color: #00bcd4;
             --border-color: rgba(255, 255, 255, 0.15);
             --active-bg: rgba(255, 255, 255, 0.1);
-            --shadow: 0 8px 32px rgba(0, 0, 50, 0.3);
+            --shadow: 0 20px 50px rgba(0, 0, 50, 0.4);
+            --input-bg: rgba(0, 0, 0, 0.2);
+            --item-hover: rgba(255, 255, 255, 0.05);
+            --mobile-main-bg: #0d1b2a;
         }
-
         [data-theme="aurora"] {
             --bg-gradient: linear-gradient(to top, #5f72bd 0%, #9b23ea 100%);
             --glass-bg: rgba(40, 20, 60, 0.6);
@@ -90,9 +98,11 @@
             --accent-color: #e040fb;
             --border-color: rgba(255, 255, 255, 0.2);
             --active-bg: rgba(255, 255, 255, 0.15);
-            --shadow: 0 8px 32px rgba(50, 0, 100, 0.3);
+            --shadow: 0 20px 50px rgba(50, 0, 100, 0.4);
+            --input-bg: rgba(255, 255, 255, 0.1);
+            --item-hover: rgba(255, 255, 255, 0.05);
+            --mobile-main-bg: #1a1a2e;
         }
-
         [data-theme="cherry"] {
             --bg-gradient: linear-gradient(to top, #fad0c4 0%, #ffd1ff 100%);
             --glass-bg: rgba(255, 250, 250, 0.85);
@@ -102,9 +112,11 @@
             --accent-color: #ec407a;
             --border-color: rgba(255, 255, 255, 0.7);
             --active-bg: #fff0f5;
-            --shadow: 0 8px 32px rgba(200, 0, 50, 0.08);
+            --shadow: 0 15px 40px rgba(200, 0, 50, 0.1);
+            --input-bg: rgba(255, 255, 255, 0.4);
+            --item-hover: rgba(255, 255, 255, 0.3);
+            --mobile-main-bg: #fff0f5;
         }
-
         [data-theme="minimal"] {
             --bg-gradient: #e0e0e0;
             --glass-bg: #ffffff;
@@ -115,185 +127,197 @@
             --border-color: #e0e0e0;
             --active-bg: #eeeeee;
             --shadow: 0 4px 12px rgba(0,0,0,0.05);
+            --input-bg: #e0e0e0;
+            --item-hover: #eaeaea;
+            --mobile-main-bg: #ffffff;
         }
+
+        @keyframes assemble-in {
+            0% { opacity: 0; transform: translateY(15px) scale(0.95); filter: blur(10px); }
+            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+        @keyframes container-in {
+            0% { opacity: 0; transform: scale(0.98); filter: blur(15px); }
+            100% { opacity: 1; transform: scale(1); filter: blur(0); }
+        }
+        @keyframes slowMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
         body {
             font-family: var(--font-stack);
             margin: 0; padding: 0;
-            height: 100vh; overflow: hidden;
+            height: 100vh; 
+            height: 100dvh; 
+            overflow: hidden;
             background: var(--bg-gradient);
-            background-size: 200% 200%;
-            animation: slowMove 25s ease infinite;
+            background-size: 400% 400%;
+            animation: slowMove 30s ease infinite;
             color: var(--text-primary);
-            transition: color 0.3s;
+            transition: color 0.5s;
         }
 
-        @keyframes slowMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-        #app-container {
-            display: flex; width: 100vw; height: 100vh;
-            padding: 20px; gap: 20px;
+        #app-container { 
+            display: flex; 
+            width: 100vw; 
+            height: 100%; 
+            padding: 20px; gap: 20px; 
+            max-width: 1800px; margin: 0 auto; 
+            position: relative;
         }
-
+        
+        .anim-stagger { opacity: 0; animation: assemble-in 0.8s var(--ease-out-expo) forwards; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.15s; }
+        .delay-3 { animation-delay: 0.2s; }
+        .delay-4 { animation-delay: 0.25s; }
+        
         aside {
-            width: var(--sidebar-w); min-width: 260px;
+            width: var(--sidebar-w); min-width: 280px;
             background: var(--sidebar-bg);
             border-radius: var(--radius-xl);
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
             display: flex; flex-direction: column;
-            padding: 16px;
+            padding: 20px;
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            transition: transform 0.3s;
-        }
-
-        .sidebar-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 12px;
+            opacity: 0;
+            animation: container-in 0.8s var(--ease-out-expo) forwards;
+            z-index: 2;
         }
         
-        .app-title {
-            font-size: 18px; font-weight: 800; letter-spacing: -0.5px;
-            display: flex; align-items: center; gap: 8px;
-        }
-
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .app-title { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; color: var(--text-primary); }
+        
         .icon-btn {
             background: transparent; border: none; color: var(--text-primary);
-            width: 32px; height: 32px; border-radius: var(--radius-sm);
-            cursor: pointer; transition: all 0.2s;
+            width: 36px; height: 36px; border-radius: 10px;
+            cursor: pointer; transition: all 0.3s var(--ease-out-expo);
             display: flex; align-items: center; justify-content: center;
+            opacity: 0.7;
         }
-        .icon-btn:hover { background: rgba(125,125,125,0.15); transform: scale(1.05); }
-        .icon-btn svg { width: 18px; height: 18px; fill: currentColor; }
+        .icon-btn:hover { background: var(--active-bg); transform: scale(1.1); opacity: 1; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .icon-btn:active { transform: scale(0.95); }
+        .icon-btn svg { width: 20px; height: 20px; fill: currentColor; }
 
-        .search-wrapper { position: relative; margin-bottom: 10px; }
+        .search-wrapper { position: relative; margin-bottom: 16px; }
         .search-input {
-            width: 100%; padding: 8px 12px 8px 34px;
-            border-radius: 8px; border: none;
-            background: rgba(125,125,125,0.1);
-            color: var(--text-primary); font-size: 13px;
-            transition: all 0.2s;
+            width: 100%; padding: 12px 14px 12px 40px;
+            border-radius: 10px; border: 1px solid transparent;
+            background: var(--input-bg);
+            color: var(--text-primary); font-size: 14px;
+            transition: all 0.3s var(--ease-out-expo);
         }
-        .search-input:focus { background: rgba(125,125,125,0.2); box-shadow: 0 0 0 2px var(--accent-color); }
-        .search-icon {
-            position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
-            width: 14px; height: 14px; opacity: 0.5; pointer-events: none;
-        }
+        .search-input:focus { background: var(--active-bg); border-color: var(--accent-color); box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15); transform: translateY(-1px); }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; opacity: 0.5; pointer-events: none; transition: opacity 0.2s; }
+        .search-input:focus + .search-icon { opacity: 0.8; color: var(--accent-color); }
 
-        .list-control {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 4px 8px; border-bottom: 1px solid var(--border-color); margin-bottom: 8px;
-        }
-        .select-all-btn { font-size: 12px; color: var(--accent-color); cursor: pointer; font-weight: 500; }
+        .list-control { display: flex; justify-content: space-between; align-items: center; padding: 0 4px 8px; border-bottom: 1px solid var(--border-color); margin-bottom: 10px; opacity: 0.7; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; }
+        .select-all-btn { color: var(--accent-color); cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: background 0.2s; }
+        .select-all-btn:hover { background: rgba(0, 122, 255, 0.1); }
 
-        #memo-list {
-            list-style: none; padding: 0; margin: 0;
-            flex-grow: 1; overflow-y: auto;
-            margin-right: -8px; padding-right: 8px;
-        }
+        #memo-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; margin-right: -10px; padding-right: 10px; scrollbar-gutter: stable; }
         
-        .memo-item {
-            padding: 10px; margin-bottom: 6px;
-            border-radius: var(--radius-md);
-            cursor: pointer; transition: all 0.2s;
-            display: flex; align-items: flex-start; gap: 10px;
+        .memo-item { 
+            padding: 14px; margin-bottom: 8px; border-radius: var(--radius-md); 
+            cursor: pointer; transition: all 0.3s var(--ease-out-expo); 
+            display: flex; align-items: flex-start; gap: 12px; 
+            border: 1px solid transparent;
+            position: relative; overflow: hidden;
+            animation: assemble-in 0.6s var(--ease-out-expo) backwards;
         }
-        .memo-item:hover { background: rgba(125,125,125,0.05); }
-        .memo-item.active { background: var(--active-bg); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .memo-item:hover { background: var(--item-hover); transform: scale(1.01); }
+        .memo-item.active { background: var(--active-bg); border-color: var(--border-color); box-shadow: 0 8px 20px rgba(0,0,0,0.04); transform: scale(1.02); z-index: 1; }
+        .memo-item.active::before { content: ''; position: absolute; left: 0; top: 14px; bottom: 14px; width: 4px; background: var(--accent-color); border-radius: 0 4px 4px 0; }
         
-        .checkbox-wrapper { padding-top: 3px; }
-        .custom-checkbox {
-            width: 16px; height: 16px; border: 1.5px solid var(--text-secondary);
-            border-radius: 5px; cursor: pointer; display: block; position: relative;
-        }
+        .checkbox-wrapper { padding-top: 3px; z-index: 2; }
+        .custom-checkbox { width: 18px; height: 18px; border: 2px solid var(--text-secondary); border-radius: 6px; cursor: pointer; display: block; position: relative; transition: all 0.2s; opacity: 0.5; }
+        .custom-checkbox:hover { opacity: 1; border-color: var(--accent-color); }
         input[type="checkbox"] { display: none; }
-        input[type="checkbox"]:checked + .custom-checkbox {
-            background: var(--accent-color); border-color: var(--accent-color);
-        }
-        input[type="checkbox"]:checked + .custom-checkbox::after {
-            content: ''; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px;
-            border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg);
-        }
-
+        input[type="checkbox"]:checked + .custom-checkbox { background: var(--accent-color); border-color: var(--accent-color); opacity: 1; }
+        input[type="checkbox"]:checked + .custom-checkbox::after { content: ''; position: absolute; left: 5px; top: 1px; width: 4px; height: 9px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+        
         .memo-info { flex-grow: 1; overflow: hidden; }
-        .memo-title { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .memo-date { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+        .memo-title { font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); line-height: 1.4; transition: color 0.2s; }
+        .memo-item.active .memo-title { color: var(--accent-color); }
+        .memo-date { font-size: 12px; color: var(--text-secondary); margin-top: 4px; font-variant-numeric: tabular-nums; opacity: 0.8; }
 
-        .sidebar-footer {
-            margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color);
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+        .sidebar-footer { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .footer-action { 
+            display: flex; align-items: center; justify-content: center; gap: 6px; 
+            background: var(--input-bg); border: none; border-radius: var(--radius-sm); 
+            padding: 12px; font-size: 12px; font-weight: 600; color: var(--text-secondary); 
+            cursor: pointer; transition: all 0.2s var(--ease-out-expo); width: 100%;
         }
-        .footer-action {
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-            background: rgba(125,125,125,0.05); border: none; border-radius: 6px;
-            padding: 8px; font-size: 11px; color: var(--text-secondary); cursor: pointer;
-            transition: all 0.2s;
-        }
-        .footer-action:hover { background: rgba(125,125,125,0.15); color: var(--text-primary); }
+        .footer-action:hover { background: var(--active-bg); color: var(--text-primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+        .footer-action:active { transform: translateY(0) scale(0.98); }
         .footer-action.danger:hover { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
 
-        main {
-            flex-grow: 1;
-            background: var(--glass-bg);
-            border-radius: var(--radius-xl);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(35px);
-            -webkit-backdrop-filter: blur(35px);
-            display: flex; flex-direction: column;
-            position: relative; overflow: hidden;
+        main { 
+            flex-grow: 1; background: var(--glass-bg); 
+            border-radius: var(--radius-xl); border: 1px solid var(--border-color); 
+            box-shadow: var(--shadow); 
+            backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px); 
+            display: flex; flex-direction: column; position: relative; overflow: hidden; 
+            opacity: 0; animation: container-in 0.8s var(--ease-out-expo) 0.1s forwards;
         }
-
-        .editor-header {
-            padding: 20px 30px 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        #title-input {
-            width: 100%; font-size: 24px; font-weight: 700; background: transparent;
-            border: none; color: var(--text-primary); margin-bottom: 5px;
-        }
-        .editor-tools { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary); }
-
-        #quill-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .ql-toolbar { border: none !important; padding: 10px 25px !important; border-bottom: 1px solid rgba(125,125,125,0.05) !important; }
-        .ql-container { border: none !important; font-size: 16px; }
-        .ql-editor { padding: 30px 40px !important; color: var(--text-primary); }
         
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: rgba(125,125,125,0.2); border-radius: 3px; }
+        .editor-header { padding: 24px 36px 16px; border-bottom: 1px solid var(--border-color); background: rgba(255,255,255,0.01); display: flex; align-items: center; justify-content: space-between; }
+        .header-left { flex-grow: 1; display: flex; flex-direction: column; }
+        
+        #mobile-back-btn { display: none; width: 32px; height: 32px; margin-right: 12px; border-radius: 50%; border: none; background: var(--input-bg); color: var(--text-primary); cursor: pointer; align-items: center; justify-content: center; transition: background 0.2s; }
+        #mobile-back-btn:active { background: var(--active-bg); }
+
+        #title-input { 
+            width: 100%; font-size: 28px; font-weight: 800; 
+            background: transparent; border: none; color: var(--text-primary); 
+            margin-bottom: 8px; padding: 4px 0; letter-spacing: -0.5px;
+            transition: opacity 0.2s;
+        }
+        #title-input::placeholder { color: var(--text-secondary); opacity: 0.3; }
+        
+        .editor-tools { display: flex; align-items: center; font-size: 13px; color: var(--text-secondary); gap: 15px; }
+        #last-edit-time { font-feature-settings: "tnum"; opacity: 0.6; font-size: 12px; font-weight: 500; }
+        
+        #quill-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .ql-toolbar { border: none !important; padding: 12px 36px !important; border-bottom: 1px solid var(--border-color) !important; opacity: 0.7; transition: opacity 0.3s; }
+        .ql-toolbar:hover { opacity: 1; }
+        .ql-container { border: none !important; font-size: 17px; font-family: var(--font-stack); }
+        .ql-editor { padding: 40px 50px 80px !important; color: var(--text-primary); line-height: 1.7; }
+        .ql-editor.ql-blank::before { color: var(--text-secondary); opacity: 0.3; font-style: normal; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(125,125,125,0.2); border-radius: 3px; transition: background 0.2s; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(125,125,125,0.4); }
         ::-webkit-scrollbar-track { background: transparent; }
 
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.3); z-index: 2000;
-            display: none; justify-content: center; align-items: center;
-            backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s;
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.3); z-index: 2000; display: none; 
+            justify-content: center; align-items: center; 
+            backdrop-filter: blur(12px); opacity: 0; transition: opacity 0.4s var(--ease-out-expo); 
         }
         .modal-overlay.show { opacity: 1; }
-        
-        .settings-modal {
-            background: var(--active-bg);
-            width: 340px; padding: 20px; border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            transform: scale(0.9); transition: transform 0.3s var(--ease-spring);
-            border: 1px solid var(--border-color);
+        .settings-modal { 
+            background: var(--glass-bg); width: 380px; padding: 24px; 
+            border-radius: 24px; box-shadow: 0 40px 80px -12px rgba(0,0,0,0.3); 
+            transform: scale(0.9) translateY(20px); transition: all 0.4s var(--ease-out-expo); 
+            border: 1px solid var(--border-color); 
         }
-        .modal-overlay.show .settings-modal { transform: scale(1); }
+        .modal-overlay.show .settings-modal { transform: scale(1) translateY(0); }
         
-        .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .theme-btn {
-            height: 50px; border-radius: 10px; cursor: pointer;
-            border: 2px solid transparent; position: relative;
-            display: flex; align-items: flex-end; justify-content: center;
-            font-size: 10px; padding-bottom: 4px; font-weight: bold; color: white;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5); overflow: hidden;
-            transition: transform 0.2s;
+        .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+        .theme-btn { 
+            height: 60px; border-radius: 14px; cursor: pointer; 
+            border: 2px solid transparent; position: relative; 
+            display: flex; align-items: flex-end; justify-content: center; 
+            font-size: 12px; padding-bottom: 8px; font-weight: 600; 
+            color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.3); 
+            overflow: hidden; transition: all 0.3s var(--ease-out-expo); box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .theme-btn:hover { transform: scale(1.05); }
-        .theme-btn.selected { border-color: var(--accent-color); box-shadow: 0 0 0 2px var(--active-bg); }
+        .theme-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .theme-btn.selected { border-color: var(--accent-color); transform: scale(0.96); box-shadow: inset 0 0 0 2px white; }
         
         .theme-btn[data-val="light"] { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); color:#333; }
         .theme-btn[data-val="dark"] { background: linear-gradient(135deg, #232526 0%, #414345 100%); }
@@ -304,102 +328,150 @@
         .theme-btn[data-val="cherry"] { background: linear-gradient(to top, #fad0c4 0%, #ffd1ff 100%); color:#333; }
         .theme-btn[data-val="minimal"] { background: #e0e0e0; color:#333; }
         
-        .system-option {
-            grid-column: span 3; background: rgba(125,125,125,0.1); color: var(--text-primary);
-            display: flex; align-items: center; justify-content: center; height: 36px;
-            border-radius: 8px; font-size: 12px; cursor: pointer; gap: 6px;
+        .system-option { 
+            grid-column: span 3; background: var(--input-bg); color: var(--text-primary); 
+            display: flex; align-items: center; justify-content: center; height: 48px; 
+            border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; gap: 8px; transition: all 0.2s;
         }
-        .system-option.selected { background: var(--accent-color); color: white; }
-
-        #toast {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
-            background: rgba(0,0,0,0.85); color: white; padding: 10px 24px; border-radius: 30px;
-            font-size: 14px; font-weight: 500; z-index: 3000; transition: all 0.5s var(--ease-spring);
-            backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        .system-option:hover { background: rgba(125,125,125,0.2); }
+        .system-option.selected { background: var(--accent-color); color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.15); transform: scale(0.98); }
+        
+        #toast { 
+            position: fixed; top: 40px; left: 50%; transform: translateX(-50%) translateY(-100px) scale(0.9); 
+            background: rgba(20,20,20,0.85); color: white; padding: 12px 32px; 
+            border-radius: 50px; font-size: 14px; font-weight: 600; z-index: 3000; 
+            transition: all 0.6s var(--ease-out-expo); backdrop-filter: blur(16px); 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.15);
         }
-        #toast.show { transform: translateX(-50%) translateY(0); }
+        #toast.show { transform: translateX(-50%) translateY(0) scale(1); }
 
-        @media (max-width: 768px) {
-            #app-container { flex-direction: column; padding: 10px; gap: 10px; }
-            aside { width: 100%; height: 45vh; }
-            main { height: 55vh; }
-            .ql-editor { padding: 15px !important; }
+        #mobile-fab { 
+            display: none; position: fixed; bottom: 30px; right: 20px; 
+            width: 56px; height: 56px; border-radius: 28px; 
+            background: var(--accent-color); color: white; border: none; 
+            box-shadow: 0 8px 20px rgba(0,122,255,0.4); z-index: 100;
+            align-items: center; justify-content: center;
+            transform: scale(0); transition: transform 0.3s var(--ease-ios);
+        }
+        #mobile-fab svg { width: 28px; height: 28px; fill: currentColor; }
+
+        @media (max-width: 768px) { 
+            body { background: var(--bg-gradient) fixed; }
+            #app-container { padding: 0; gap: 0; width: 100%; height: 100%; max-width: none; overflow: hidden; position: relative; }
+            
+            aside { 
+                position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+                border-radius: 0; border: none; padding: 20px 16px 100px 16px;
+                z-index: 10; transform: translateX(0); opacity: 1;
+                transition: transform 0.4s var(--ease-ios), opacity 0.4s;
+                background: transparent; box-shadow: none;
+            }
+            .sidebar-header { margin-top: 10px; margin-bottom: 10px; }
+            .app-title { font-size: 24px; }
+            #add-memo { display: none; } 
+            #mobile-fab { display: flex; transform: scale(1); }
+            .sidebar-footer { margin-top: 20px; border-top: none; grid-template-columns: repeat(2, 1fr); padding-bottom: 40px; }
+
+            main { 
+                position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+                border-radius: 0; border: none; z-index: 20;
+                transform: translateX(100%);
+                transition: transform 0.4s var(--ease-ios);
+                background: var(--mobile-main-bg); 
+                backdrop-filter: none;
+                box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+                opacity: 1; animation: none;
+            }
+            
+            .editor-header { 
+                padding: 12px 16px; 
+                background: var(--mobile-main-bg);
+                position: sticky; top: 0; z-index: 30; border-bottom: 1px solid var(--border-color);
+            }
+            #mobile-back-btn { display: flex; }
+            #title-input { font-size: 20px; }
+            .editor-tools { font-size: 0; gap: 8px; }
+            .editor-tools button { width: 32px; height: 32px; }
+            #last-edit-time { display: none; }
+            
+            .ql-toolbar { 
+                order: 2; padding: 10px 8px !important; 
+                border-top: 1px solid var(--border-color) !important;
+                border-bottom: none !important; background: var(--mobile-main-bg);
+                display: flex; gap: 4px; overflow-x: auto;
+                padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+            }
+            #quill-container { flex-direction: column; }
+            .ql-container { order: 1; flex-grow: 1; }
+            .ql-editor { padding: 20px 16px !important; font-size: 16px; }
+
+            body.is-mobile-editing aside { transform: translateX(-30%); opacity: 0; pointer-events: none; }
+            body.is-mobile-editing main { transform: translateX(0); }
+            body.is-mobile-editing #mobile-fab { transform: scale(0); }
+
+            .modal-overlay { align-items: flex-end; }
+            .settings-modal { width: 100%; border-radius: 24px 24px 0 0; padding-bottom: max(30px, env(safe-area-inset-bottom)); transform: translateY(100%); }
+            .modal-overlay.show .settings-modal { transform: translateY(0); }
         }
     </style>
 </head>
 <body data-theme="light">
-
 <div id="app-container">
-    <aside>
-        <div class="sidebar-header">
+    <aside class="anim-stagger delay-1">
+        <div class="sidebar-header anim-stagger delay-2">
             <div class="app-title">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                TrioNote
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                Trionote
             </div>
-            <div style="display:flex; gap:5px;">
+            <div style="display:flex; gap:8px;">
                 <button class="icon-btn" id="btn-settings" title="主题设置">
                     <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z"/></svg>
                 </button>
-                <button class="icon-btn" id="add-memo" title="新建">
+                <button class="icon-btn" id="add-memo" title="新建" style="background:var(--accent-color); color:white; opacity:1;">
                     <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
                 </button>
             </div>
         </div>
-
-        <div class="search-wrapper">
+        <div class="search-wrapper anim-stagger delay-3">
             <svg class="search-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
             <input type="text" class="search-input" id="search-input" placeholder="搜索内容...">
         </div>
-        
-        <div class="list-control">
-            <span style="font-size:11px; color:var(--text-secondary); font-weight:600;">备忘录清单</span>
+        <div class="list-control anim-stagger delay-3">
+            <span style="font-size:12px; color:var(--text-secondary); font-weight:600;">全部笔记</span>
             <span class="select-all-btn" id="toggle-select-all">全选</span>
         </div>
-
-        <ul id="memo-list">
-        </ul>
-
-        <div class="sidebar-footer">
-            <label class="footer-action" for="import-zip">
-                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> ZIP导入
-            </label>
-            <label class="footer-action" for="import-txt">
-                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg> TXT导入
-            </label>
-            <button class="footer-action" id="export-selected">
-                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg> 导出选中
-            </button>
-            <button class="footer-action danger" id="delete-selected">
-                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> 删除
-            </button>
+        <ul id="memo-list" class="anim-stagger delay-4"></ul>
+        <div class="sidebar-footer anim-stagger delay-4">
+            <label class="footer-action" for="import-zip"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> 导入ZIP</label>
+            <label class="footer-action" for="import-txt"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg> 导入TXT</label>
+            <button class="footer-action" id="export-selected"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg> 导出</button>
+            <button class="footer-action danger" id="delete-selected"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> 删除</button>
         </div>
     </aside>
-
     <main>
         <div id="editor-ui" style="display:flex; flex-direction:column; height:100%;">
-            <div class="editor-header">
-                <input type="text" id="title-input" placeholder="无标题">
-                <div class="editor-tools">
+            <div class="editor-header anim-stagger delay-3">
+                <button id="mobile-back-btn"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+                <div class="header-left">
+                    <input type="text" id="title-input" placeholder="无标题">
                     <span id="last-edit-time">刚刚</span>
-                    <div>
-                        <button class="icon-btn" onclick="adjustFont(2)" title="放大">A+</button>
-                        <button class="icon-btn" onclick="adjustFont(-2)" title="缩小">A-</button>
-                        <button class="icon-btn" id="export-all" title="备份全部">
-                            <svg viewBox="0 0 24 24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg>
-                        </button>
-                    </div>
+                </div>
+                <div class="editor-tools">
+                    <button class="icon-btn" onclick="adjustFont(2)" title="放大" style="width:30px; height:30px; font-size:12px; font-weight:700;">A+</button>
+                    <button class="icon-btn" onclick="adjustFont(-2)" title="缩小" style="width:30px; height:30px; font-size:12px; font-weight:700;">A-</button>
+                    <button class="icon-btn" id="export-all" title="备份全部" style="width:30px; height:30px;"><svg viewBox="0 0 24 24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg></button>
                 </div>
             </div>
-            <div id="quill-container">
-                <div id="editor"></div>
-            </div>
+            <div id="quill-container" class="anim-stagger delay-4"><div id="editor"></div></div>
         </div>
-
-        <div id="empty-state" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; color:var(--text-secondary); display:none;">
-            <svg viewBox="0 0 24 24" width="64" height="64" fill="currentColor" style="opacity:0.2"><path d="M13 11h-2v3H8v2h3v3h2v-3h3v-2h-3zm1-9H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 18H6V4h7v5h5v11z"/></svg>
-            <p>选择或新建备忘录</p>
+        <div id="empty-state" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; color:var(--text-secondary); display:none; opacity:0.6;">
+            <svg viewBox="0 0 24 24" width="80" height="80" fill="currentColor" style="opacity:0.2; margin-bottom:12px;"><path d="M13 11h-2v3H8v2h3v3h2v-3h3v-2h-3zm1-9H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 18H6V4h7v5h5v11z"/></svg>
+            <p style="font-size:15px; font-weight:500;">选择或新建备忘录</p>
         </div>
     </main>
+    <button id="mobile-fab" onclick="createMemo()">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+    </button>
 </div>
 
 <input type="file" id="import-zip" style="display:none" accept=".zip">
@@ -407,13 +479,11 @@
 
 <div class="modal-overlay" id="settings-modal">
     <div class="settings-modal">
-        <h3 style="margin:0 0 15px 0; color:var(--text-primary);">个性化主题</h3>
-        
-        <div class="system-option" id="system-theme-btn">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg>
-            跟随系统设置
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 style="margin:0; color:var(--text-primary); font-size:18px;">个性化主题</h3>
+            <button class="icon-btn" onclick="toggleModal('settings-modal', false)" style="background:rgba(125,125,125,0.1); width:32px; height:32px; border-radius:50%;">✕</button>
         </div>
-
+        <div class="system-option" id="system-theme-btn"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg>跟随系统设置</div>
         <div class="theme-grid">
             <div class="theme-btn" data-val="light">Light</div>
             <div class="theme-btn" data-val="dark">Dark</div>
@@ -424,9 +494,8 @@
             <div class="theme-btn" data-val="cherry">Cherry</div>
             <div class="theme-btn" data-val="minimal">Gray</div>
         </div>
-        
-        <div style="margin-top:20px; text-align:right">
-            <button class="icon-btn" onclick="toggleModal('settings-modal', false)" style="background:var(--accent-color); color:white; width:auto; padding:0 20px;">完成</button>
+        <div style="margin-top:24px; text-align:center;">
+            <button onclick="toggleModal('settings-modal', false)" style="background:var(--accent-color); color:white; border:none; padding:12px 40px; border-radius:30px; font-weight:600; font-size:14px; cursor:pointer; box-shadow:0 8px 20px rgba(0,0,0,0.15); transition:transform 0.2s;">完成设置</button>
         </div>
     </div>
 </div>
@@ -438,22 +507,14 @@
         init() {
             const saved = localStorage.getItem('theme') || 'system';
             this.setTheme(saved);
-            
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-                if (localStorage.getItem('theme') === 'system') this.applySystemTheme();
-            });
-
-            document.querySelectorAll('.theme-btn').forEach(btn => {
-                btn.onclick = () => this.setTheme(btn.dataset.val);
-            });
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => { if (localStorage.getItem('theme') === 'system') this.applySystemTheme(); });
+            document.querySelectorAll('.theme-btn').forEach(btn => { btn.onclick = () => this.setTheme(btn.dataset.val); });
             document.getElementById('system-theme-btn').onclick = () => this.setTheme('system');
         },
         setTheme(name) {
             localStorage.setItem('theme', name);
-            
             document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('selected', b.dataset.val === name));
             document.getElementById('system-theme-btn').classList.toggle('selected', name === 'system');
-
             if (name === 'system') this.applySystemTheme();
             else document.body.setAttribute('data-theme', name);
         },
@@ -462,320 +523,163 @@
             document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
         }
     };
-
     let db, memos = {}, currentId = null, quill, saveTimer;
-
     function init() {
         ThemeManager.init();
-        
-        quill = new Quill('#editor', {
-            theme: 'snow',
-            modules: { toolbar: [
-                [{ 'header': [1, 2, false] }],
-                ['bold', 'italic', 'underline', 'strike'],
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                ['link', 'image', 'clean']
-            ]},
-            placeholder: '在此输入内容...'
-        });
-
+        quill = new Quill('#editor', { theme: 'snow', modules: { toolbar: [[{ 'header': [1, 2, false] }],['bold', 'italic', 'underline', 'strike'],[{ 'list': 'ordered'}, { 'list': 'bullet' }],['link', 'image', 'clean']]}, placeholder: '在此输入内容...' });
+        // MODIFICATION HERE: Changed WujianNoteDB back to TrioNote for compatibility
         const req = indexedDB.open('TrioNote', 1);
-        req.onupgradeneeded = e => {
-            const db = e.target.result;
-            if(!db.objectStoreNames.contains('memos')) db.createObjectStore('memos', { keyPath: 'id' });
-        };
-        req.onsuccess = e => {
-            db = e.target.result;
-            loadData();
-        };
-
+        req.onupgradeneeded = e => { const db = e.target.result; if(!db.objectStoreNames.contains('memos')) db.createObjectStore('memos', { keyPath: 'id' }); };
+        req.onsuccess = e => { db = e.target.result; loadData(); };
         bindEvents();
     }
-
     function bindEvents() {
         document.getElementById('add-memo').onclick = createMemo;
         document.getElementById('btn-settings').onclick = () => toggleModal('settings-modal', true);
         document.getElementById('search-input').oninput = renderList;
         document.getElementById('toggle-select-all').onclick = toggleSelectAll;
-        
         document.getElementById('import-zip').onchange = (e) => handleImport(e, 'zip');
         document.getElementById('import-txt').onchange = (e) => handleImport(e, 'txt');
         document.getElementById('export-selected').onclick = () => exportMemos(true);
         document.getElementById('export-all').onclick = () => exportMemos(false);
         document.getElementById('delete-selected').onclick = deleteSelected;
-
         document.getElementById('title-input').addEventListener('input', debounceSave);
-        quill.on('text-change', (delta, old, source) => {
-            if(source === 'user') debounceSave();
+        document.getElementById('mobile-back-btn').onclick = () => { 
+            document.body.classList.remove('is-mobile-editing'); 
+            document.activeElement.blur(); 
+        };
+        quill.on('text-change', (delta, old, source) => { if(source === 'user') debounceSave(); });
+        document.getElementById('settings-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'settings-modal') toggleModal('settings-modal', false);
         });
     }
-
     function loadData() {
         const tx = db.transaction('memos', 'readonly');
         tx.objectStore('memos').getAll().onsuccess = e => {
             const arr = e.target.result;
             memos = arr.reduce((acc, cur) => ({...acc, [cur.id]: cur}), {});
-            
-            if(arr.length > 0 && typeof arr[0].order === 'undefined') {
-                 arr.forEach((m, i) => memos[m.id].order = i);
-            }
-            
+            if(arr.length > 0 && typeof arr[0].order === 'undefined') { arr.forEach((m, i) => memos[m.id].order = i); }
             renderList();
-            if(arr.length > 0) {
-                const first = arr.sort((a,b) => a.order - b.order)[0];
-                selectMemo(first.id);
-            } else {
-                showEmptyState(true);
-            }
+            if(window.innerWidth > 768) {
+                if(arr.length > 0) { const first = arr.sort((a,b) => a.order - b.order)[0]; selectMemo(first.id); }
+                else { showEmptyState(true); }
+            } else { showEmptyState(true); }
         };
     }
-
     function renderList() {
-        const list = document.getElementById('memo-list');
-        list.innerHTML = '';
+        const list = document.getElementById('memo-list'); list.innerHTML = '';
         const query = document.getElementById('search-input').value.toLowerCase();
-        
         const sorted = Object.values(memos).sort((a,b) => (a.order || 0) - (b.order || 0));
-
-        sorted.forEach(m => {
+        sorted.forEach((m, index) => {
             if (query && !m.title.toLowerCase().includes(query) && !m.text.toLowerCase().includes(query)) return;
-
-            const li = document.createElement('li');
-            li.className = `memo-item ${m.id === currentId ? 'active' : ''}`;
-            li.setAttribute('data-id', m.id); 
-            li.onclick = (e) => {
-                if(e.target.type !== 'checkbox' && !e.target.classList.contains('custom-checkbox')) selectMemo(m.id);
-            };
-
-            li.innerHTML = `
-                <div class="checkbox-wrapper">
-                    <input type="checkbox" id="cb-${m.id}" data-id="${m.id}">
-                    <label for="cb-${m.id}" class="custom-checkbox"></label>
-                </div>
-                <div class="memo-info">
-                    <div class="memo-title">${m.title || '无标题'}</div>
-                    <div class="memo-date">${formatDate(m.updatedAt)}</div>
-                </div>
-            `;
+            const li = document.createElement('li'); 
+            li.className = `memo-item ${m.id === currentId ? 'active' : ''}`; 
+            li.style.animationDelay = `${0.05 * index}s`; 
+            li.setAttribute('data-id', m.id);
+            li.onclick = (e) => { if(e.target.type !== 'checkbox' && !e.target.classList.contains('custom-checkbox')) selectMemo(m.id); };
+            li.innerHTML = `<div class="checkbox-wrapper"><input type="checkbox" id="cb-${m.id}" data-id="${m.id}"><label for="cb-${m.id}" class="custom-checkbox"></label></div><div class="memo-info"><div class="memo-title">${m.title || '无标题'}</div><div class="memo-date">${formatDate(m.updatedAt)}</div></div>`;
             list.appendChild(li);
         });
-
-        if(!query) {
-            new Sortable(list, {
-                animation: 150,
-                delay: 100,
-                onEnd: (evt) => {
-                    const items = Array.from(list.children);
-                    items.forEach((item, idx) => {
-                        const id = item.querySelector('input').dataset.id;
-                        memos[id].order = idx;
-                    });
-                    saveAllOrder();
-                }
-            });
-        }
+        if(!query) { new Sortable(list, { animation: 150, delay: 100, onEnd: (evt) => { const items = Array.from(list.children); items.forEach((item, idx) => { const id = item.querySelector('input').dataset.id; memos[id].order = idx; }); saveAllOrder(); } }); }
     }
-
     function selectMemo(id) {
-        currentId = id;
-        showEmptyState(false);
-        const m = memos[id];
+        currentId = id; showEmptyState(false); const m = memos[id];
         document.getElementById('title-input').value = m.title;
         document.getElementById('last-edit-time').textContent = formatDate(m.updatedAt);
-        
         const savedSize = localStorage.getItem(`fontsize-${id}`) || 16;
         document.querySelector('.ql-editor').style.fontSize = savedSize + 'px';
-
         quill.setContents(quill.clipboard.convert(m.content), 'silent');
-        
         document.querySelectorAll('.memo-item').forEach(el => el.classList.remove('active'));
-        const activeLi = document.querySelector(`input[data-id="${id}"]`)?.closest('li');
-        if(activeLi) activeLi.classList.add('active');
+        const activeLi = document.querySelector(`input[data-id="${id}"]`)?.closest('li'); if(activeLi) activeLi.classList.add('active');
+        if(window.innerWidth <= 768) {
+             document.body.classList.add('is-mobile-editing');
+        }
     }
-
     function createMemo() {
         const id = 'memo_' + Date.now();
-        const newMemo = {
-            id,
-            title: '新备忘录',
-            content: '',
-            text: '',
-            updatedAt: new Date().toISOString(),
-            order: -1
-        };
-        Object.values(memos).forEach(m => m.order++);
-        newMemo.order = 0;
-        
-        memos[id] = newMemo;
-        saveToDB(newMemo);
-        saveAllOrder();
-        selectMemo(id);
-        renderList();
-        document.getElementById('title-input').focus();
-        document.getElementById('title-input').select();
+        const newMemo = { id, title: '新备忘录', content: '', text: '', updatedAt: new Date().toISOString(), order: -1 };
+        Object.values(memos).forEach(m => m.order++); newMemo.order = 0;
+        memos[id] = newMemo; saveToDB(newMemo); saveAllOrder();
+        selectMemo(id); renderList();
+        if(window.innerWidth <= 768) document.body.classList.add('is-mobile-editing');
+        setTimeout(() => { document.getElementById('title-input').focus(); document.getElementById('title-input').select(); }, 300);
     }
-
     function debounceSave() {
         clearTimeout(saveTimer);
         saveTimer = setTimeout(() => {
             if(!currentId) return;
-            const m = memos[currentId];
-            m.title = document.getElementById('title-input').value;
-            m.content = quill.root.innerHTML;
-            m.text = quill.getText();
-            m.updatedAt = new Date().toISOString();
+            const m = memos[currentId]; m.title = document.getElementById('title-input').value; m.content = quill.root.innerHTML; m.text = quill.getText(); m.updatedAt = new Date().toISOString();
             document.getElementById('last-edit-time').textContent = "刚刚";
-            
-            saveToDB(m);
-            renderList();
-            showToast('已自动保存');
+            saveToDB(m); renderList(); showToast('已自动保存');
         }, 800);
     }
-
-    function saveToDB(memo) {
-        const tx = db.transaction('memos', 'readwrite');
-        tx.objectStore('memos').put(memo);
-    }
-
-    function saveAllOrder() {
-        const tx = db.transaction('memos', 'readwrite');
-        const store = tx.objectStore('memos');
-        Object.values(memos).forEach(m => store.put(m));
-    }
-
+    function saveToDB(memo) { const tx = db.transaction('memos', 'readwrite'); tx.objectStore('memos').put(memo); }
+    function saveAllOrder() { const tx = db.transaction('memos', 'readwrite'); const store = tx.objectStore('memos'); Object.values(memos).forEach(m => store.put(m)); }
     async function exportMemos(onlySelected) {
         let targets = [];
-        if(onlySelected) {
-            const checked = document.querySelectorAll('input[type="checkbox"]:checked');
-            if(checked.length === 0) return showToast('未选择条目');
-            checked.forEach(cb => targets.push(memos[cb.dataset.id]));
-        } else {
-            targets = Object.values(memos);
-            if(targets.length === 0) return showToast('无数据');
-        }
-
-        const zip = new JSZip();
-        targets.forEach(m => {
-            const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${m.title}</title></head><body>${m.content}</body></html>`;
-            zip.file(`${m.title || 'untitled'}.html`, "\uFEFF" + html);
-        });
-
-        const blob = await zip.generateAsync({type:"blob"});
-        saveAs(blob, `TrioNote_${onlySelected?'Selected':'All'}.zip`);
-        showToast('导出成功');
+        if(onlySelected) { const checked = document.querySelectorAll('input[type="checkbox"]:checked'); if(checked.length === 0) return showToast('未选择条目'); checked.forEach(cb => targets.push(memos[cb.dataset.id])); }
+        else { targets = Object.values(memos); if(targets.length === 0) return showToast('无数据'); }
+        const zip = new JSZip(); targets.forEach(m => { const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${m.title}</title></head><body>${m.content}</body></html>`; zip.file(`${m.title || 'untitled'}.html`, "\uFEFF" + html); });
+        const blob = await zip.generateAsync({type:"blob"}); saveAs(blob, `Trionote_${onlySelected?'选中':'全部'}.zip`); showToast('导出成功');
     }
-
     async function handleImport(e, type) {
-        const file = e.target.files[0];
-        if(!file) return;
+        const file = e.target.files[0]; if(!file) return;
         
-        let count = 0;
-        const tx = db.transaction('memos', 'readwrite');
-        const store = tx.objectStore('memos');
-
-        if (type === 'zip') {
-            const zip = await JSZip.loadAsync(file);
-            const promises = [];
-            zip.forEach((path, entry) => {
-                if(entry.name.endsWith('.html') && !entry.dir) {
-                    promises.push(entry.async('string').then(content => {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(content, 'text/html');
-                        addImportedMemo(entry.name.replace('.html',''), doc.body.innerHTML, doc.body.textContent, store);
-                        count++;
-                    }));
-                }
+        let newMemos = [];
+        if (type === 'zip') { 
+            const zip = await JSZip.loadAsync(file); 
+            const promises = []; 
+            zip.forEach((path, entry) => { 
+                if(entry.name.endsWith('.html') && !entry.dir) { 
+                    promises.push(entry.async('string').then(content => { 
+                        const parser = new DOMParser(); 
+                        const doc = parser.parseFromString(content, 'text/html'); 
+                        newMemos.push({
+                            title: entry.name.replace('.html',''), 
+                            content: doc.body.innerHTML, 
+                            text: doc.body.textContent
+                        });
+                    })); 
+                } 
+            }); 
+            await Promise.all(promises); 
+        } else if (type === 'txt') { 
+            const content = await file.text(); 
+            const htmlContent = content.split('\n').map(line => `<p>${line}</p>`).join(''); 
+            newMemos.push({
+                title: file.name.replace('.txt',''), 
+                content: htmlContent, 
+                text: content
             });
-            await Promise.all(promises);
-        } else if (type === 'txt') {
-            const content = await file.text();
-            const htmlContent = content.split('\n').map(line => `<p>${line}</p>`).join('');
-            addImportedMemo(file.name.replace('.txt',''), htmlContent, content, store);
-            count = 1;
         }
-
-        renderList();
-        showToast(`成功导入 ${count} 条`);
-        e.target.value = '';
+        
+        if (newMemos.length > 0) {
+            const tx = db.transaction('memos', 'readwrite'); 
+            const store = tx.objectStore('memos');
+            newMemos.forEach(m => {
+                const id = 'memo_' + Date.now() + Math.random(); 
+                store.put({ id, title: m.title, content: m.content, text: m.text, updatedAt: new Date().toISOString(), order: 0 });
+                memos[id] = { id, title: m.title, content: m.content, text: m.text, updatedAt: new Date().toISOString(), order: 0 };
+            });
+            
+            tx.oncomplete = () => {
+                renderList(); 
+                showToast(`成功导入 ${newMemos.length} 条`); 
+                e.target.value = '';
+            };
+        }
     }
-
-    function addImportedMemo(title, content, text, store) {
-        const id = 'memo_' + Date.now() + Math.random();
-        const m = {
-            id, title, content, text,
-            updatedAt: new Date().toISOString(),
-            order: 0
-        };
-        memos[id] = m;
-        store.put(m);
-    }
-
+    function addImportedMemo(title, content, text, store) { }
     function deleteSelected() {
-        const checked = document.querySelectorAll('input[type="checkbox"]:checked');
-        if(checked.length === 0) return;
-        
-        if(confirm(`删除 ${checked.length} 项?`)) {
-            const tx = db.transaction('memos', 'readwrite');
-            checked.forEach(cb => {
-                const id = cb.dataset.id;
-                delete memos[id];
-                tx.objectStore('memos').delete(id);
-                if(id === currentId) {
-                    currentId = null;
-                    showEmptyState(true);
-                }
-            });
-            renderList();
-        }
+        const checked = document.querySelectorAll('input[type="checkbox"]:checked'); if(checked.length === 0) return;
+        if(confirm(`删除 ${checked.length} 项?`)) { const tx = db.transaction('memos', 'readwrite'); checked.forEach(cb => { const id = cb.dataset.id; delete memos[id]; tx.objectStore('memos').delete(id); if(id === currentId) { currentId = null; showEmptyState(true); } }); renderList(); }
     }
-
-    function toggleSelectAll() {
-        const cbs = document.querySelectorAll('#memo-list input[type="checkbox"]');
-        const allChecked = Array.from(cbs).every(cb => cb.checked);
-        cbs.forEach(cb => cb.checked = !allChecked);
-    }
-
-    function toggleModal(id, show) {
-        const el = document.getElementById(id);
-        if(show) {
-            el.style.display = 'flex';
-            setTimeout(() => el.classList.add('show'), 10);
-        } else {
-            el.classList.remove('show');
-            setTimeout(() => el.style.display = 'none', 300);
-        }
-    }
-
-    function adjustFont(delta) {
-        if(!currentId) return;
-        const editor = document.querySelector('.ql-editor');
-        let current = parseInt(window.getComputedStyle(editor).fontSize) || 16;
-        current += delta;
-        editor.style.fontSize = current + 'px';
-        localStorage.setItem(`fontsize-${currentId}`, current);
-    }
-
-    function showEmptyState(show) {
-        document.getElementById('editor-ui').style.display = show ? 'none' : 'flex';
-        document.getElementById('empty-state').style.display = show ? 'block' : 'none';
-    }
-
-    function showToast(msg) {
-        const t = document.getElementById('toast');
-        t.innerText = msg;
-        t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 2000);
-    }
-
-    function formatDate(iso) {
-        const d = new Date(iso);
-        const now = new Date();
-        if(d.toDateString() === now.toDateString()) {
-            return `${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
-        }
-        return `${d.getMonth()+1}/${d.getDate()}`;
-    }
-
+    function toggleSelectAll() { const cbs = document.querySelectorAll('#memo-list input[type="checkbox"]'); const allChecked = Array.from(cbs).every(cb => cb.checked); cbs.forEach(cb => cb.checked = !allChecked); }
+    function toggleModal(id, show) { const el = document.getElementById(id); if(show) { el.style.display = 'flex'; setTimeout(() => el.classList.add('show'), 10); } else { el.classList.remove('show'); setTimeout(() => el.style.display = 'none', 300); } }
+    function adjustFont(delta) { if(!currentId) return; const editor = document.querySelector('.ql-editor'); let current = parseInt(window.getComputedStyle(editor).fontSize) || 16; current += delta; editor.style.fontSize = current + 'px'; localStorage.setItem(`fontsize-${currentId}`, current); }
+    function showEmptyState(show) { document.getElementById('editor-ui').style.display = show ? 'none' : 'flex'; document.getElementById('empty-state').style.display = show ? 'block' : 'none'; }
+    function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+    function formatDate(iso) { const d = new Date(iso); const now = new Date(); if(d.toDateString() === now.toDateString()) { return `${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`; } return `${d.getMonth()+1}/${d.getDate()}`; }
     init();
 </script>
 </body>
