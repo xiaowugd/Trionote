@@ -527,7 +527,6 @@
     function init() {
         ThemeManager.init();
         quill = new Quill('#editor', { theme: 'snow', modules: { toolbar: [[{ 'header': [1, 2, false] }],['bold', 'italic', 'underline', 'strike'],[{ 'list': 'ordered'}, { 'list': 'bullet' }],['link', 'image', 'clean']]}, placeholder: '在此输入内容...' });
-        // MODIFICATION HERE: Changed WujianNoteDB back to TrioNote for compatibility
         const req = indexedDB.open('TrioNote', 1);
         req.onupgradeneeded = e => { const db = e.target.result; if(!db.objectStoreNames.contains('memos')) db.createObjectStore('memos', { keyPath: 'id' }); };
         req.onsuccess = e => { db = e.target.result; loadData(); };
